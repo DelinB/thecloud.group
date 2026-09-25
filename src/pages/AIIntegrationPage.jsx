@@ -7,31 +7,31 @@ import {
 
 
 const USE_CASES = [
-  { icon: 'bot',      title: 'Agents & Bots',     sub: 'Customer service, internal assistants.' },
-  { icon: 'zap',      title: 'Automation',        sub: 'Email, documents, data, workflow.' },
-  { icon: 'chart',    title: 'Prediction & ML',   sub: 'Demand forecasting, fraud detection.' },
-  { icon: 'message',  title: 'NLP & Language',    sub: 'Sentiment, classification, extraction.' },
+  { icon: 'bot', title: 'Agents & Bots', sub: 'Customer service, internal assistants.' },
+  { icon: 'zap', title: 'Automation', sub: 'Email, documents, data, workflow.' },
+  { icon: 'chart', title: 'Prediction & ML', sub: 'Demand forecasting, fraud detection.' },
+  { icon: 'message', title: 'NLP & Language', sub: 'Sentiment, classification, extraction.' },
   { icon: 'database', title: 'Data Intelligence', sub: 'Smart dashboards on your own data.' },
-  { icon: 'shield',   title: 'AI Safety',         sub: 'Secure AI agents and data.' }
+  { icon: 'shield', title: 'AI Safety', sub: 'Secure AI agents and data.' }
 ];
 
 const CONSULTANTS = ['Sell chatbots as \u201CAI\u201D', 'POC never reaches production', 'No engineering background', 'Disappear after delivery'];
-const TCG_SIDE    = ['Find ROI before code', 'POC in production', '10+ years engineering', 'Monitor + retrain'];
+const TCG_SIDE = ['Find ROI before code', 'POC in production', '10+ years engineering', 'Monitor + retrain'];
 
 const POC_STEPS = [
-  { n: '01', week: 'Week 1', title: 'Analyze',   icon: 'chart', desc: 'We audit your data and map the ROI before any code is written.', bullets: ['Data audit', 'ROI map', 'Success metric'] },
-  { n: '02', week: 'Week 2', title: 'Roadmap',   icon: 'spark', desc: 'You get a fixed plan: architecture, model choices, cost, timeline.', bullets: ['Architecture', 'Model choices', 'Fixed price'] },
-  { n: '03', week: 'Week 3', title: 'Build',     icon: 'bot',   desc: 'We wire the AI into your stack with guardrails and eval tests.', bullets: ['Integration', 'Guardrails', 'Eval tests'] },
-  { n: '04', week: 'Week 4', title: 'Working AI',icon: 'zap',   desc: 'Demo day. Real inputs, real outputs, on your infrastructure.', bullets: ['Live demo', 'Handover', 'Monitoring plan'] }
+  { n: '01', week: 'Week 1', title: 'Analyze', icon: 'chart', desc: 'We audit your data and map the ROI before any code is written.', bullets: ['Data audit', 'ROI map', 'Success metric'] },
+  { n: '02', week: 'Week 2', title: 'Roadmap', icon: 'spark', desc: 'You get a fixed plan: architecture, model choices, cost, timeline.', bullets: ['Architecture', 'Model choices', 'Fixed price'] },
+  { n: '03', week: 'Week 3', title: 'Build', icon: 'bot', desc: 'We wire the AI into your stack with guardrails and eval tests.', bullets: ['Integration', 'Guardrails', 'Eval tests'] },
+  { n: '04', week: 'Week 4', title: 'Working AI', icon: 'zap', desc: 'Demo day. Real inputs, real outputs, on your infrastructure.', bullets: ['Live demo', 'Handover', 'Monitoring plan'] }
 ];
 
 const INDUSTRIES = [
-  { icon: 'dollar',   label: 'Fintech',   apps: 'Fraud detection, credit scoring' },
-  { icon: 'truck',    label: 'Logistics', apps: 'Route optimization, demand forecasting' },
-  { icon: 'users',    label: 'HR',        apps: 'CV screening, matching, onboarding' },
-  { icon: 'activity', label: 'Pharma',    apps: 'Trial analysis, diagnosis support' },
-  { icon: 'bag',      label: 'Retail',    apps: 'Recommendations, dynamic pricing' },
-  { icon: 'zap',      label: 'Energy',    apps: 'Predictive maintenance' }
+  { icon: 'dollar', label: 'Fintech', apps: 'Fraud detection, credit scoring' },
+  { icon: 'truck', label: 'Logistics', apps: 'Route optimization, demand forecasting' },
+  { icon: 'users', label: 'HR', apps: 'CV screening, matching, onboarding' },
+  { icon: 'activity', label: 'Pharma', apps: 'Trial analysis, diagnosis support' },
+  { icon: 'bag', label: 'Retail', apps: 'Recommendations, dynamic pricing' },
+  { icon: 'zap', label: 'Energy', apps: 'Predictive maintenance' }
 ];
 
 const FAQS = [
@@ -120,9 +120,15 @@ function Hero() {
         </div>
 
         <h1 className="uppercase max-w-[20ch] text-[clamp(2.2rem,7.5vw,6.2rem)] leading-[.95] tracking-[-.045em] font-normal">
-          <SplitLines lines={['AI that pays', 'for itself.', "In 4 weeks, you'll"]} startDelay={180} />
+          <SplitLines
+            lines={['AI that pays', 'for itself.', "In 4 weeks, you'll"]}
+            startDelay={180}
+          />
+
           <span className="split-line" style={{ '--wd': '590ms' }}>
-            <span><span className="hl-wipe">know exactly how.</span></span>
+            <span className="bg-gradient-to-r from-[var(--fg)] via-[var(--accent)] to-[var(--fg)] bg-[length:200%_100%] bg-clip-text text-transparent motion-safe:animate-[gradientShift_5s_ease_infinite]">
+              know exactly how.
+            </span>
           </span>
         </h1>
 

@@ -1,416 +1,1149 @@
-import React, { Fragment, useState } from 'react';
-import {
-  CONTAINER, Icon, GlobalHeroBackground,
-  useReveal, useCountUp, useSectionTabMemory
-} from '../components/shared';
+// import React, { useMemo, useState } from 'react';
+// import { CONTAINER, SECTION } from '../components/shared/constants';
+// import { Icon } from '../components/shared/Icon';
+// import { GlobalHeroBackground } from '../components/shared/GlobalHeroBackground';
 
+// const CATEGORIES = [
+//   'All',
+//   'Real Cases',
+//   'Technology Consulting',
+//   'Data & AI',
+//   'Software Engineering',
+//   'SaaS & Product',
+//   'Founder Notes',
+// ];
 
-/* ---------- SECTIONS 3+4: FILTER + ARTICLE GRID ---------- */
+// const FEATURED = {
+//   category: 'Data & AI',
+//   title: "The 88% uses AI. That doesn't mean the 88% is creating value.",
+//   author: '[Author Name]',
+//   readingTime: '8 min read',
+//   date: 'September 23, 2026',
+//   href: '#featured-article',
+// };
+
+// const ARTICLES = [
+//   {
+//     id: 1,
+//     category: 'Real Cases',
+//     title: '[Article title — Real Cases]',
+//     excerpt: '[Add a two-line case-study excerpt here.]',
+//     author: '[Author Name]',
+//     date: 'September 2026',
+//     readingTime: '6 min read',
+//   },
+//   {
+//     id: 2,
+//     category: 'Technology Consulting',
+//     title: '[Article title — Technology Consulting]',
+//     excerpt: '[Add a two-line consulting insight here.]',
+//     author: '[Author Name]',
+//     date: 'September 2026',
+//     readingTime: '7 min read',
+//   },
+//   {
+//     id: 3,
+//     category: 'Data & AI',
+//     title: '[Article title — Data & AI]',
+//     excerpt: '[Add a two-line AI or data engineering insight here.]',
+//     author: '[Author Name]',
+//     date: 'September 2026',
+//     readingTime: '5 min read',
+//   },
+//   {
+//     id: 4,
+//     category: 'Software Engineering',
+//     title: '[Article title — Software Engineering]',
+//     excerpt: '[Add a two-line software engineering lesson here.]',
+//     author: '[Author Name]',
+//     date: 'September 2026',
+//     readingTime: '9 min read',
+//   },
+//   {
+//     id: 5,
+//     category: 'SaaS & Product',
+//     title: '[Article title — SaaS & Product]',
+//     excerpt: '[Add a two-line product or SaaS lesson here.]',
+//     author: '[Author Name]',
+//     date: 'September 2026',
+//     readingTime: '6 min read',
+//   },
+//   {
+//     id: 6,
+//     category: 'Founder Notes',
+//     title: '[Article title — Founder Notes]',
+//     excerpt: '[Add a two-line founder lesson here.]',
+//     author: '[Author Name]',
+//     date: 'September 2026',
+//     readingTime: '4 min read',
+//   },
+// ];
+
+// function Reveal({ children, className = '', delay = 0 }) {
+//   return (
+//     <div
+//       className={`transition-all duration-700 ease-out ${className}`}
+//       style={{ transitionDelay: `${delay}ms` }}
+//     >
+//       {children}
+//     </div>
+//   );
+// }
+
+// function SearchIcon({ className = 'w-5' }) {
+//   return (
+//     <svg
+//       viewBox="0 0 24 24"
+//       fill="none"
+//       stroke="currentColor"
+//       strokeWidth="1.8"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//       className={className}
+//       aria-hidden="true"
+//     >
+//       <circle cx="11" cy="11" r="7" />
+//       <path d="m20 20-4-4" />
+//     </svg>
+//   );
+// }
+
+// function SubscribeForm({ compact = false }) {
+//   const [email, setEmail] = useState('');
+//   const [submitted, setSubmitted] = useState(false);
+
+//   return (
+//     <form
+//       onSubmit={(event) => {
+//         event.preventDefault();
+//         if (!email.trim()) return;
+//         setSubmitted(true);
+//       }}
+//       className={compact ? 'flex w-full flex-col gap-2 sm:flex-row' : 'flex w-full flex-col gap-2 sm:flex-row'}
+//     >
+//       <label className="sr-only" htmlFor={compact ? 'newsletter-email-mid' : 'newsletter-email-top'}>
+//         Email address
+//       </label>
+
+//       <input
+//         id={compact ? 'newsletter-email-mid' : 'newsletter-email-top'}
+//         type="email"
+//         value={email}
+//         onChange={(event) => {
+//           setEmail(event.target.value);
+//           if (submitted) setSubmitted(false);
+//         }}
+//         required
+//         placeholder="you@company.com"
+//         className={[
+//           'min-w-0 flex-1 rounded-full border border-[var(--border)] bg-[var(--bg)] px-5 text-sm outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]',
+//           compact ? 'h-11' : 'h-12',
+//         ].join(' ')}
+//       />
+
+//       <button
+//         type="submit"
+//         className={[
+//           'group inline-flex shrink-0 items-center justify-center gap-3 rounded-full bg-[var(--fg)] font-medium text-[var(--bg)]',
+//           compact ? 'h-11 px-4 text-xs' : 'h-12 px-5 text-sm',
+//         ].join(' ')}
+//       >
+//         <span>{submitted ? 'Subscribed' : 'Subscribe'}</span>
+//         {!submitted && (
+//           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
+//             <Icon name="arrow" className="w-3.5" />
+//           </span>
+//         )}
+//       </button>
+
+//       {submitted && (
+//         <p className="sr-only" role="status">
+//           Subscription request received.
+//         </p>
+//       )}
+//     </form>
+//   );
+// }
+
+// function Hero({ query, setQuery }) {
+//   return (
+//     <section className="relative overflow-hidden pt-32 pb-16">
+//       <GlobalHeroBackground />
+//       <div
+//         aria-hidden
+//         className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--bg)] via-[color:var(--bg)/.78] to-transparent"
+//       />
+
+//       <div className={`${CONTAINER} relative z-10`}>
+//         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
+//           <Reveal>
+//             <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
+//               Insights
+//             </p>
+
+//             <h1 className="max-w-[12ch] text-[clamp(2.7rem,7vw,6.4rem)] font-normal leading-[.92] tracking-[-.055em]">
+//               Insights from real engineering
+//             </h1>
+
+//             <p className="mt-6 max-w-2xl text-[clamp(.96rem,1.1vw,1.08rem)] leading-[1.65] text-[var(--muted)]">
+//               No fluff. No buzzwords. Just what we&apos;ve learned building 2,000+ projects.
+//             </p>
+//           </Reveal>
+
+//           <Reveal delay={120}>
+//             <div className="rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 sm:p-6">
+//               <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+//                 <SearchIcon className="w-4" />
+//                 Search articles
+//               </div>
+
+//               <div className="relative">
+//                 <SearchIcon className="pointer-events-none absolute left-4 top-1/2 w-4 -translate-y-1/2 text-[var(--muted)]" />
+//                 <input
+//                   id="insights-search"
+//                   type="search"
+//                   value={query}
+//                   onChange={(event) => setQuery(event.target.value)}
+//                   placeholder="Search articles..."
+//                   className="h-12 w-full rounded-full border border-[var(--border)] bg-[var(--bg)] pl-11 pr-5 text-sm outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+//                 />
+//               </div>
+
+//               <div className="mt-5 border-t border-[var(--border)] pt-5">
+//                 <p className="text-xs font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+//                   Weekly newsletter
+//                 </p>
+//                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+//                   Real engineering lessons. One email per week.
+//                 </p>
+//                 <div className="mt-4">
+//                   <SubscribeForm />
+//                 </div>
+//               </div>
+//             </div>
+//           </Reveal>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
+
+// function FeaturedArticle() {
+//   return (
+//     <section id="featured-article" className={SECTION}>
+//       <div className={CONTAINER}>
+//         <Reveal>
+//           <div className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--fg)] text-[var(--bg)]">
+//             <div className="grid gap-0 lg:grid-cols-[1.1fr_.9fr]">
+//               <div className="relative min-h-[320px] overflow-hidden p-7 sm:p-10 lg:p-12">
+//                 <div
+//                   aria-hidden
+//                   className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--accent)] opacity-25 blur-3xl"
+//                 />
+//                 <div className="relative">
+//                   <span className="inline-flex rounded-full bg-[var(--accent)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--accent-ink)]">
+//                     Featured Insight
+//                   </span>
+
+//                   <h2 className="mt-8 max-w-[13ch] text-[clamp(2rem,4.8vw,4.5rem)] leading-[.95] tracking-[-.05em]">
+//                     {FEATURED.title}
+//                   </h2>
+
+//                   <a
+//                     href={FEATURED.href}
+//                     className="group mt-8 inline-flex items-center gap-3 text-sm font-medium"
+//                   >
+//                     <span className="underline underline-offset-4">Read Full Article</span>
+//                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
+//                       <Icon name="arrow" className="w-4 transition-transform group-hover:translate-x-1" />
+//                     </span>
+//                   </a>
+//                 </div>
+//               </div>
+
+//               <div className="border-t border-[color:var(--bg)/.14] bg-[color:var(--bg)/.08] p-7 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
+//                 <div className="flex h-full flex-col justify-between">
+//                   <div>
+//                     <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[color:var(--bg)/.5]">
+//                       Article details
+//                     </p>
+
+//                     <div className="mt-6 space-y-5">
+//                       <div>
+//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:var(--bg)/.45]">
+//                           Author
+//                         </p>
+//                         <p className="mt-1 text-sm font-medium">{FEATURED.author}</p>
+//                       </div>
+
+//                       <div>
+//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:var(--bg)/.45]">
+//                           Reading time
+//                         </p>
+//                         <p className="mt-1 text-sm font-medium">{FEATURED.readingTime}</p>
+//                       </div>
+
+//                       <div>
+//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:var(--bg)/.45]">
+//                           Published
+//                         </p>
+//                         <p className="mt-1 text-sm font-medium">{FEATURED.date}</p>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   <div className="mt-10 flex items-center gap-2 text-xs text-[color:var(--bg)/.55]">
+//                     <Icon name="clock" className="w-4" />
+//                     <span>{FEATURED.readingTime}</span>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </Reveal>
+//       </div>
+//     </section>
+//   );
+// }
+
+// function ArticleCard({ article, index }) {
+//   return (
+//     <article className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--fg)/.24] sm:p-6">
+//       <div className="flex items-center justify-between gap-4">
+//         <span className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+//           {article.category}
+//         </span>
+//         <span className="text-[10px] text-[var(--muted)]">{String(index + 1).padStart(2, '0')}</span>
+//       </div>
+
+//       <h3 className="mt-6 line-clamp-2 min-h-[3.4rem] text-xl leading-[1.15] tracking-[-.025em]">
+//         {article.title}
+//       </h3>
+
+//       <p className="mt-3 line-clamp-2 min-h-[3rem] text-sm leading-6 text-[var(--muted)]">
+//         {article.excerpt}
+//       </p>
+
+//       <div className="mt-auto pt-8">
+//         <div className="flex items-center justify-between gap-3 text-xs text-[var(--muted)]">
+//           <span>{article.author}</span>
+//           <span>{article.readingTime}</span>
+//         </div>
+
+//         <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+//           <span className="text-[11px] text-[var(--muted)]">{article.date}</span>
+//           <a
+//             href={`#article-${article.id}`}
+//             className="inline-flex items-center gap-1.5 text-xs font-semibold"
+//           >
+//             Read
+//             <Icon name="arrow" className="w-3.5 transition-transform group-hover:translate-x-1" />
+//           </a>
+//         </div>
+//       </div>
+//     </article>
+//   );
+// }
+
+// function CategoryFilter({ category, setCategory }) {
+//   return (
+//     <section id="categories" className="pb-4 pt-4">
+//       <div className={CONTAINER}>
+//         <Reveal>
+//           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+//             <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">
+//               Browse by category
+//             </p>
+
+//             <div className="flex gap-2 overflow-x-auto pb-2">
+//               {CATEGORIES.map((item) => {
+//                 const active = category === item;
+
+//                 return (
+//                   <button
+//                     key={item}
+//                     type="button"
+//                     onClick={() => setCategory(item)}
+//                     className={`shrink-0 rounded-full border px-4 py-2.5 text-xs font-medium transition-colors ${
+//                       active
+//                         ? 'border-transparent bg-[var(--fg)] text-[var(--bg)]'
+//                         : 'border-[var(--border)] bg-[color:var(--card)] text-[var(--muted)] hover:text-[var(--fg)]'
+//                     }`}
+//                   >
+//                     {item}
+//                   </button>
+//                 );
+//               })}
+//             </div>
+//           </div>
+//         </Reveal>
+//       </div>
+//     </section>
+//   );
+// }
+
+// function ArticleGrid({ category, setCategory, query, setQuery }) {
+//   const filteredArticles = useMemo(() => {
+//     const normalized = query.trim().toLowerCase();
+
+//     return ARTICLES.filter((article) => {
+//       const categoryMatches = category === 'All' || article.category === category;
+//       const queryMatches =
+//         !normalized ||
+//         [article.title, article.excerpt, article.author, article.category]
+//           .join(' ')
+//           .toLowerCase()
+//           .includes(normalized);
+
+//       return categoryMatches && queryMatches;
+//     });
+//   }, [category, query]);
+
+//   return (
+//     <section id="articles" className={SECTION}>
+//       <div className={CONTAINER}>
+//         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+//           <Reveal>
+//             <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
+//               Article library
+//             </p>
+//             <h2 className="text-[clamp(2rem,5.5vw,4.8rem)] leading-none tracking-[-.05em]">
+//               Ideas worth reading.
+//             </h2>
+//           </Reveal>
+
+//           <Reveal delay={80} className="w-full max-w-md">
+//             <div className="relative">
+//               <SearchIcon className="pointer-events-none absolute left-4 top-1/2 w-4 -translate-y-1/2 text-[var(--muted)]" />
+//               <input
+//                 type="search"
+//                 value={query}
+//                 onChange={(event) => setQuery(event.target.value)}
+//                 placeholder="Search articles..."
+//                 className="h-11 w-full rounded-full border border-[var(--border)] bg-[color:var(--card)] pl-11 pr-5 text-sm outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+//               />
+//             </div>
+//           </Reveal>
+//         </div>
+
+//         <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+//           {filteredArticles.map((article, index) => (
+//             <Reveal key={article.id} delay={Math.min(index, 5) * 55}>
+//               <ArticleCard article={article} index={index} />
+//             </Reveal>
+//           ))}
+//         </div>
+
+//         {filteredArticles.length === 0 && (
+//           <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[color:var(--card)] px-6 py-12 text-center">
+//             <p className="text-lg font-medium">No articles match that search.</p>
+//             <p className="mt-2 text-sm text-[var(--muted)]">
+//               Try another keyword or category.
+//             </p>
+//             <button
+//               type="button"
+//               onClick={() => {
+//                 setQuery('');
+//                 setCategory('All');
+//               }}
+//               className="mt-5 rounded-full bg-[var(--fg)] px-5 py-2.5 text-xs font-medium text-[var(--bg)]"
+//             >
+//               Clear filters
+//             </button>
+//           </div>
+//         )}
+//       </div>
+//     </section>
+//   );
+// }
+
+// function MidNewsletter() {
+//   return (
+//     <section className={`${SECTION} bg-[color:var(--card)]`}>
+//       <div className={CONTAINER}>
+//         <Reveal>
+//           <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg)] p-6 sm:p-10 lg:p-12">
+//             <div className="grid gap-8 lg:grid-cols-[1fr_.85fr] lg:items-center">
+//               <div>
+//                 <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">
+//                   Weekly newsletter
+//                 </p>
+//                 <h2 className="mt-3 max-w-[15ch] text-[clamp(2rem,4vw,3.8rem)] leading-[.98] tracking-[-.05em]">
+//                   Get insights before your competitors do.
+//                 </h2>
+//                 <p className="mt-4 max-w-xl text-sm leading-6 text-[var(--muted)]">
+//                   One email per week. Real engineering lessons. Unsubscribe anytime.
+//                 </p>
+//               </div>
+
+//               <div>
+//                 <SubscribeForm compact />
+//               </div>
+//             </div>
+//           </div>
+//         </Reveal>
+//       </div>
+//     </section>
+//   );
+// }
+
+// function FinalCTA() {
+//   return (
+//     <section id="consultation" className="relative overflow-hidden py-20 sm:py-28">
+//       <div
+//         aria-hidden
+//         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,color-mix(in_srgb,var(--accent)_17%,transparent),transparent_36%),linear-gradient(180deg,var(--card),var(--bg))]"
+//       />
+
+//       <div className={`${CONTAINER} relative`}>
+//         <Reveal>
+//           <div className="mx-auto flex max-w-4xl flex-col items-center rounded-[2rem] border border-[var(--border)] bg-[color:var(--bg)/.86] px-6 py-12 text-center backdrop-blur-xl sm:px-10 sm:py-16">
+//             <p className="text-xs font-semibold uppercase tracking-[.17em] text-[var(--muted)]">
+//               Talk to the team
+//             </p>
+//             <h2 className="mt-3 max-w-[11ch] text-[clamp(2.2rem,5.3vw,4.8rem)] leading-[.95] tracking-[-.05em]">
+//               Prefer talking to building?
+//             </h2>
+//             <p className="mt-4 max-w-lg text-sm leading-6 text-[var(--muted)]">
+//               Take the next step with a focused conversation about what you&apos;re trying to solve.
+//             </p>
+
+//             <a
+//               href="/contact"
+//               className="group mt-7 inline-flex h-12 items-center gap-3 rounded-full bg-[var(--fg)] pl-5 pr-1.5 text-sm font-medium text-[var(--bg)]"
+//             >
+//               Book Free Consultation
+//               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
+//                 <Icon name="arrow" className="w-4 transition-transform group-hover:translate-x-1" />
+//               </span>
+//             </a>
+//           </div>
+//         </Reveal>
+//       </div>
+//     </section>
+//   );
+// }
+
+// export default function InsightsPage() {
+//   const [category, setCategory] = useState('All');
+//   const [query, setQuery] = useState('');
+
+//   return (
+//     <>
+//       <Hero query={query} setQuery={setQuery} />
+//       <FeaturedArticle />
+//       <CategoryFilter category={category} setCategory={setCategory} />
+//       <ArticleGrid
+//         category={category}
+//         setCategory={setCategory}
+//         query={query}
+//         setQuery={setQuery}
+//       />
+//       <MidNewsletter />
+//       <FinalCTA />
+
+//       <style>{`
+//         .line-clamp-2 {
+//           display: -webkit-box;
+//           -webkit-line-clamp: 2;
+//           -webkit-box-orient: vertical;
+//           overflow: hidden;
+//         }
+
+//         @media (prefers-reduced-motion: reduce) {
+//           * {
+//             scroll-behavior: auto !important;
+//           }
+//         }
+//       `}</style>
+//     </>
+//   );
+// }
+
+import React, { useMemo, useState } from 'react';
+import { CONTAINER, SECTION } from '../components/shared/constants';
+import { Icon } from '../components/shared/Icon';
+import { GlobalHeroBackground } from '../components/shared/GlobalHeroBackground';
+
 const CATEGORIES = [
-  { name: 'Real Cases',            color: '#ef4444',        icon: 'filecheck' },
-  { name: 'Technology Consulting', color: 'rgb(225,252,6)', icon: 'compass' },
-  { name: 'Data & AI',             color: '#22c55e',        icon: 'spark' },
-  { name: 'Software Engineering',  color: '#3b82f6',        icon: 'code' },
-  { name: 'SaaS & Product',        color: '#a855f7',        icon: 'chart' },
-  { name: 'Founder Notes',         color: '#f97316',        icon: 'pen' }
+  'All',
+  'Real Cases',
+  'Technology Consulting',
+  'Data & AI',
+  'Software Engineering',
+  'SaaS & Product',
+  'Founder Notes',
 ];
-const CAT_BY_NAME = {};
-CATEGORIES.forEach((c) => { CAT_BY_NAME[c.name] = c; });
 
-/* TODO: titles, excerpts, authors and dates below are placeholders —
-   replace with real content, and swap href="#" for real article URLs */
+const FEATURED = {
+  category: 'Data & AI',
+  title: "The 88% uses AI. That doesn't mean the 88% is creating value.",
+  author: 'Marcus Feld',
+  readingTime: '8 min read',
+  date: 'September 23, 2026',
+  slug: 'the-88-percent-uses-ai',
+};
+
 const ARTICLES = [
-  { id: 'a1', category: 'Real Cases', title: 'We audited a SaaS that spent \u20AC400k on features nobody used',
-    excerpt: 'Six months of discovery, 34 features shipped, 3 ever opened. Here\u2019s the post-mortem \u2014 and the four questions that would have caught it in week one.',
-    author: 'David Ruiz', date: 'Sep 10, 2026', read: 6 },
-  { id: 'a2', category: 'Technology Consulting', title: 'NIS2 is not a compliance project. It\u2019s an architecture project.',
-    excerpt: 'Most companies treat NIS2 as paperwork. The ones that pass treat it as a reason to finally fix their architecture. The difference shows up in the audit.',
-    author: 'Sofia Lang', date: 'Sep 2, 2026', read: 7 },
-  { id: 'a3', category: 'Software Engineering', title: 'Your monolith isn\u2019t the problem. Your boundaries are.',
-    excerpt: 'We\u2019ve watched teams spend years splitting a monolith and end up with a distributed monolith. The fix isn\u2019t microservices \u2014 it\u2019s drawing the right lines first.',
-    author: 'David Ruiz', date: 'Aug 26, 2026', read: 9 },
-  { id: 'a4', category: 'Technology Consulting', title: 'The POC trap: how 4 weeks beats 6 months',
-    excerpt: 'Long discovery phases feel rigorous and produce decks. Short POCs feel risky and produce working software. We ran the numbers on 90+ projects.',
-    author: 'Marc Vidal', date: 'Aug 18, 2026', read: 5 },
-  { id: 'a5', category: 'Data & AI', title: 'Fine-tuning vs RAG: we ran both on the same data',
-    excerpt: 'Same corpus, same evaluation set, two very different invoices. When each approach wins \u2014 with the benchmarks to back it.',
-    author: 'Elena M\u00E1rquez', date: 'Aug 5, 2026', read: 12 },
-  { id: 'a6', category: 'SaaS & Product', title: 'Churn isn\u2019t a metric. It\u2019s a product decision you already made.',
-    excerpt: 'By the time churn shows up in your dashboard, the decision that caused it is six months old. How to find those decisions earlier.',
-    author: 'Marc Vidal', date: 'Jul 28, 2026', read: 7 },
-  { id: 'a7', category: 'Software Engineering', title: 'The Excel files that run your company are a liability',
-    excerpt: 'Every company has them: the spreadsheet only one person understands, that the business quietly depends on. A practical guide to finding and retiring them.',
-    author: 'Sofia Lang', date: 'Jul 15, 2026', read: 6 },
-  { id: 'a8', category: 'Founder Notes', title: 'What 2,000 projects taught us about estimating software',
-    excerpt: 'Every estimate is wrong. The good ones are wrong in a known direction, by a known amount. Our internal method, minus the survivorship bias.',
-    author: 'Marc Vidal', date: 'Jul 3, 2026', read: 11 },
-  { id: 'a9', category: 'Real Cases', title: 'SISCOVA: what digitizing a national petroleum company actually takes',
-    excerpt: '\u20AC2.4M saved a year sounds like a slide-deck number. Here\u2019s the unglamorous engineering behind it: data migrations, change management, and 100% adoption.',
-    author: 'Elena M\u00E1rquez', date: 'Jun 24, 2026', read: 10 },
-  { id: 'a10', category: 'SaaS & Product', title: 'Pricing pages: the highest-ROI engineering nobody schedules',
-    excerpt: 'A two-week pricing page rebuild outperformed a six-month feature roadmap. What we changed, what we measured, and what surprised us.',
-    author: 'Sofia Lang', date: 'Jun 10, 2026', read: 5 },
-  { id: 'a11', category: 'Founder Notes', title: 'Hiring your first engineer: what we\u2019d do differently',
-    excerpt: 'Your first hire isn\u2019t a junior who codes what you say. It\u2019s a future technical decision-maker. The profile we look for now \u2014 and the one we wasted a year on.',
-    author: 'Marc Vidal', date: 'May 28, 2026', read: 8 }
+  {
+    id: 1,
+    slug: 'rebuilding-14-year-old-erp',
+    category: 'Real Cases',
+    title: "We rebuilt a 14-year-old ERP in 9 months. Here's what we'd do differently.",
+    excerpt:
+      'A mid-size logistics company ran their entire operation on a system nobody could modify. The rebuild worked — the sequencing was wrong.',
+    author: 'Elena Ríos',
+    date: 'September 2026',
+    readingTime: '6 min read',
+  },
+  {
+    id: 2,
+    slug: 'architecture-review-saved-400k',
+    category: 'Technology Consulting',
+    title: 'The architecture review that saved a client $400k',
+    excerpt:
+      'They were about to sign a three-year contract for a platform they didn’t need. Two weeks of architecture review changed the decision.',
+    author: 'Tomas Berg',
+    date: 'September 2026',
+    readingTime: '7 min read',
+  },
+  {
+    id: 3,
+    slug: 'data-pipeline-is-lying',
+    category: 'Data & AI',
+    title: 'Your data pipeline is probably lying to you',
+    excerpt:
+      'Silent failures, timezone drift, and null handling — the three data quality bugs that break dashboards without warning anyone.',
+    author: 'Priya Nair',
+    date: 'September 2026',
+    readingTime: '5 min read',
+  },
+  {
+    id: 4,
+    slug: 'integration-tests-before-unit-tests',
+    category: 'Software Engineering',
+    title: 'Why we still write integration tests before unit tests',
+    excerpt:
+      'Unit tests give you confidence in functions. Integration tests give you confidence in the system. Only one of those ships to production.',
+    author: 'Daniel Okafor',
+    date: 'September 2026',
+    readingTime: '9 min read',
+  },
+  {
+    id: 5,
+    slug: 'per-user-pricing-trap',
+    category: 'SaaS & Product',
+    title: 'The per-user pricing trap (and how to escape it)',
+    excerpt:
+      'SaaS made sense when software was rented. When your team grows, the math stops working. Here’s the break-even point.',
+    author: 'Sara Lindqvist',
+    date: 'September 2026',
+    readingTime: '6 min read',
+  },
+  {
+    id: 6,
+    slug: 'hiring-is-not-a-strategy',
+    category: 'Founder Notes',
+    title: 'Hiring senior engineers is not a growth strategy',
+    excerpt:
+      'Every founder thinks the next hire fixes the bottleneck. Usually the bottleneck is a decision nobody wants to make.',
+    author: 'Marcus Feld',
+    date: 'September 2026',
+    readingTime: '4 min read',
+  },
 ];
 
-function ArticleCard({ a, i }) {
-  const cat = CAT_BY_NAME[a.category];
-  const initials = a.author.split(' ').map((w) => w[0]).slice(0, 2).join('');
+function Reveal({ children, className = '', delay = 0 }) {
   return (
-    <article className="art-card card-in group relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4"
-      style={{ '--i': i, '--c': cat.color, background: 'var(--card)', border: '1px solid var(--border)' }}>
+    <div
+      className={`transition-all duration-700 ease-out ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
 
-      <Icon name={cat.icon} className="uc-ghost w-24 h-24" />
+function SearchIcon({ className = 'w-5' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4-4" />
+    </svg>
+  );
+}
 
-      <div className="relative flex flex-col gap-3 flex-1">
-        <span className="inline-flex items-center gap-2 t-chip uppercase tracking-wide self-start" style={{ color: 'var(--muted)' }}>
-          <span className="w-2 h-2 rounded-full" style={{ background: cat.color }} />
-          {a.category}
+function SubscribeForm({ compact = false }) {
+  const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!email.trim()) return;
+        setSubmitted(true);
+      }}
+      className="flex w-full flex-col gap-2 sm:flex-row"
+    >
+      <label
+        className="sr-only"
+        htmlFor={compact ? 'newsletter-email-mid' : 'newsletter-email-top'}
+      >
+        Email address
+      </label>
+
+      <input
+        id={compact ? 'newsletter-email-mid' : 'newsletter-email-top'}
+        type="email"
+        value={email}
+        onChange={(event) => {
+          setEmail(event.target.value);
+          if (submitted) setSubmitted(false);
+        }}
+        required
+        placeholder="you@company.com"
+        className={[
+          'min-w-0 flex-1 rounded-full border border-[var(--border)] bg-[var(--bg)] px-5 text-sm outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]',
+          compact ? 'h-11' : 'h-12',
+        ].join(' ')}
+      />
+
+      <button
+        type="submit"
+        className={[
+          'group inline-flex shrink-0 items-center justify-center gap-3 rounded-full bg-[var(--fg)] font-medium text-[var(--bg)]',
+          compact ? 'h-11 px-4 text-xs' : 'h-12 px-5 text-sm',
+        ].join(' ')}
+      >
+        <span>{submitted ? 'Subscribed' : 'Subscribe'}</span>
+        {!submitted && (
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
+            <Icon name="arrow" className="w-3.5" />
+          </span>
+        )}
+      </button>
+
+      {submitted && (
+        <p className="sr-only" role="status">
+          Subscription request received.
+        </p>
+      )}
+    </form>
+  );
+}
+
+function Hero({ query, setQuery }) {
+  return (
+    <section className="relative overflow-hidden pt-32 pb-16">
+      <GlobalHeroBackground />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--bg)] via-[color:color-mix(in_srgb,var(--bg)_78%,transparent)] to-transparent"
+      />
+
+      <div className={`${CONTAINER} relative z-10`}>
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
+          <Reveal>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
+              Insights
+            </p>
+
+            <h1 className="max-w-[12ch] text-[clamp(2.7rem,7vw,6.4rem)] font-normal leading-[.92] tracking-[-.055em]">
+              Insights from real engineering
+            </h1>
+
+            <p className="mt-6 max-w-2xl text-[clamp(.96rem,1.1vw,1.08rem)] leading-[1.65] text-[var(--muted)]">
+              No fluff. No buzzwords. Just what we&apos;ve learned building 2,000+ projects.
+            </p>
+          </Reveal>
+
+          <Reveal delay={120}>
+            <div className="rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 sm:p-6">
+              <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+                <SearchIcon className="w-4" />
+                Search articles
+              </div>
+
+              <div className="relative">
+                <SearchIcon className="pointer-events-none absolute left-4 top-1/2 w-4 -translate-y-1/2 text-[var(--muted)]" />
+                <input
+                  id="insights-search"
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search articles..."
+                  className="h-12 w-full rounded-full border border-[var(--border)] bg-[var(--bg)] pl-11 pr-5 text-sm outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+                />
+              </div>
+
+              <div className="mt-5 border-t border-[var(--border)] pt-5">
+                <p className="text-xs font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+                  Weekly newsletter
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                  Real engineering lessons. One email per week.
+                </p>
+                <div className="mt-4">
+                  <SubscribeForm />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeaturedArticle() {
+  return (
+    <section id="featured-article" className={SECTION}>
+      <div className={CONTAINER}>
+        <Reveal>
+          <div className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--fg)] text-[var(--bg)]">
+            <div className="grid gap-0 lg:grid-cols-[1.1fr_.9fr]">
+              <div className="relative min-h-[320px] overflow-hidden p-7 sm:p-10 lg:p-12">
+                <div
+                  aria-hidden="true"
+                  className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--accent)] opacity-25 blur-3xl"
+                />
+                <div className="relative">
+                  <span className="inline-flex rounded-full bg-[var(--accent)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--accent-ink)]">
+                    Featured Insight
+                  </span>
+
+                  <h2 className="mt-8 max-w-[13ch] text-[clamp(2rem,4.8vw,4.5rem)] leading-[.95] tracking-[-.05em]">
+                    {FEATURED.title}
+                  </h2>
+
+                  <a
+                    href={`/insights/${FEATURED.slug}`}
+                    className="group mt-8 inline-flex items-center gap-3 text-sm font-medium"
+                  >
+                    <span className="underline underline-offset-4">Read Full Article</span>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
+                      <Icon
+                        name="arrow"
+                        className="w-4 transition-transform group-hover:translate-x-1"
+                      />
+                    </span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="border-t border-[color:color-mix(in_srgb,var(--bg)_14%,transparent)] bg-[color:color-mix(in_srgb,var(--bg)_8%,transparent)] p-7 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
+                <div className="flex h-full flex-col justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[color:color-mix(in_srgb,var(--bg)_50%,transparent)]">
+                      Article details
+                    </p>
+
+                    <div className="mt-6 space-y-5">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[.12em] text-[color:color-mix(in_srgb,var(--bg)_45%,transparent)]">
+                          Author
+                        </p>
+                        <p className="mt-1 text-sm font-medium">{FEATURED.author}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[.12em] text-[color:color-mix(in_srgb,var(--bg)_45%,transparent)]">
+                          Reading time
+                        </p>
+                        <p className="mt-1 text-sm font-medium">{FEATURED.readingTime}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[.12em] text-[color:color-mix(in_srgb,var(--bg)_45%,transparent)]">
+                          Published
+                        </p>
+                        <p className="mt-1 text-sm font-medium">{FEATURED.date}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-10 flex items-center gap-2 text-xs text-[color:color-mix(in_srgb,var(--bg)_55%,transparent)]">
+                    <Icon name="clock" className="w-4" />
+                    <span>{FEATURED.readingTime}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function ArticleCard({ article, index }) {
+  return (
+    <article className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[color:color-mix(in_srgb,var(--fg)_24%,transparent)] sm:p-6">
+      <div className="flex items-center justify-between gap-4">
+        <span className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+          {article.category}
         </span>
-        <h3 className="t-h3 line-clamp-2" style={{ lineHeight: 1.25 }}>{a.title}</h3>
-        <p className="t-small line-clamp-2" style={{ color: 'var(--muted)' }}>{a.excerpt}</p>
+        <span className="text-[10px] text-[var(--muted)]">
+          {String(index + 1).padStart(2, '0')}
+        </span>
       </div>
 
-      <div className="relative flex items-center gap-3 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <span className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-medium shrink-0"
-          style={{ background: 'var(--fg)', color: 'var(--bg)' }}>{initials}</span>
-        <span className="flex flex-col min-w-0">
-          <span className="t-small truncate">{a.author}</span>
-          <span className="t-chip" style={{ color: 'var(--muted)' }}>{a.date} · {a.read} min</span>
-        </span>
-        <a href="#" onClick={(e) => e.preventDefault()} className="link-arrow ml-auto shrink-0" style={{ fontSize: '.85rem' }}>
-          Read <Icon name="arrow" className="w-3.5" />
-        </a>
+      <h3 className="mt-6 line-clamp-2 min-h-[3.4rem] text-xl leading-[1.15] tracking-[-.025em]">
+        {article.title}
+      </h3>
+
+      <p className="mt-3 line-clamp-2 min-h-[3rem] text-sm leading-6 text-[var(--muted)]">
+        {article.excerpt}
+      </p>
+
+      <div className="mt-auto pt-8">
+        <div className="flex items-center justify-between gap-3 text-xs text-[var(--muted)]">
+          <span>{article.author}</span>
+          <span>{article.readingTime}</span>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+          <span className="text-[11px] text-[var(--muted)]">{article.date}</span>
+          <a
+            href={`/insights/${article.slug}`}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold"
+          >
+            Read
+            <Icon
+              name="arrow"
+              className="w-3.5 transition-transform group-hover:translate-x-1"
+            />
+          </a>
+        </div>
       </div>
     </article>
   );
 }
 
-function Articles({ query, setQuery, category, setCategory }) {
-  const q = query.trim().toLowerCase();
-  const filtered = ARTICLES.filter((a) => {
-    const matchesQ = !q || [a.title, a.excerpt, a.author, a.category].join(' ').toLowerCase().includes(q);
-    const matchesC = category === 'All' || a.category === category;
-    return matchesQ && matchesC;
-  });
-
-  const pill = (name) => {
-    const active = category === name;
-    const count = name === 'All' ? ARTICLES.length : ARTICLES.filter((a) => a.category === name).length;
-    return (
-      <button key={name} type="button" onClick={() => setCategory(name)} aria-pressed={active}
-        className={'shrink-0 h-9 px-4 rounded-full t-chip whitespace-nowrap transition-opacity ' + (active ? '' : 'hover:opacity-70')}
-        style={active ? { background: 'var(--fg)', color: 'var(--bg)' } : { color: 'var(--fg)' }}>
-        {name}
-        <span className="hidden sm:inline opacity-60 ml-1.5">{count}</span>
-      </button>
-    );
-  };
-
+function CategoryFilter({ category, setCategory }) {
   return (
-    <section id="articles" className="relative w-full z-[1] pt-2 pb-14 md:pb-20">
-      <div className="sticky top-[70px] md:top-[84px] z-40 py-3">
-        <div className="container-x">
-          <div className="no-scrollbar overflow-x-auto rounded-full flex items-center gap-1 p-1.5 shadow-sm"
-            style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-            {pill('All')}
-            {CATEGORIES.map((c) => pill(c.name))}
-            <span className="ml-auto shrink-0 t-chip pr-3 hidden md:flex" style={{ color: 'var(--muted)' }}>
-              {filtered.length} article{filtered.length === 1 ? '' : 's'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="container-x mt-8">
-        {/* key on category only: switching replays the stagger; typing updates in place */}
-        <div key={category} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {filtered.map((a, i) => <ArticleCard key={a.id} a={a} i={i} />)}
-
-          {filtered.length === 0 && (
-            <div className="card-in col-span-full flex flex-col items-center gap-4 py-20 text-center" style={{ '--i': 0 }}>
-              <Icon name="search" className="w-10 h-10" style={{ color: 'var(--muted)' }} />
-              <p className="t-h3">Nothing matches{q ? ' \u201C' + query.trim() + '\u201D' : ''}.</p>
-              <p className="t-small" style={{ color: 'var(--muted)' }}>Try different keywords, or reset the filters.</p>
-              <button type="button" onClick={() => { setQuery(''); setCategory('All'); }} className="btn-ghost">
-                Clear search &amp; filters
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- MARQUEE DIVIDER ---------- */
-function Band() {
-  const items = ['no fluff', 'no buzzwords', 'real cases', 'from the trenches'];
-  const loop = items.concat(items, items, items);
-  return (
-    <div className="marquee-mask w-full py-8 md:py-12 z-[1] relative" data-reveal>
-      <div className="marquee-track slow">
-        {loop.map((t, i) => (
-          <Fragment key={i}>
-            <span className="t-h2 uppercase whitespace-nowrap" style={{ opacity: .9 }}>{t}</span>
-            <span className="w-3.5 h-3.5 md:w-5 md:h-5 rounded-full shrink-0" style={{ background: 'var(--accent)' }} />
-          </Fragment>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ---------- SECTION 5: MID-PAGE NEWSLETTER ---------- */
-function Newsletter() {
-  const [sent, setSent] = useState(false);
-  return (
-    <section id="subscribe" className="relative w-full z-[1] py-14 md:py-20">
-      <div className="container-x">
-        <div data-reveal className="relative overflow-hidden rounded-3xl px-6 py-14 md:px-16 md:py-20 flex flex-col items-center text-center gap-7"
-          style={{ background: 'linear-gradient(135deg, rgb(225,252,6) 0%, rgb(196,222,3) 100%)', color: '#000' }}>
-          <Icon name="mail" className="absolute -top-8 -right-8 w-48 h-48" style={{ opacity: .12 }} />
-
-          <h2 className="t-h2-sm uppercase max-w-[22ch]">Get insights before your competitors do.</h2>
-          <p className="t-body max-w-md" style={{ color: 'rgba(0,0,0,.72)' }}>
-            One email per week. Real engineering lessons. Unsubscribe anytime.
-          </p>
-
-          {sent ? (
-            <div className="fade-in flex items-center gap-3">
-              <span className="pop w-11 h-11 rounded-full flex items-center justify-center" style={{ background: '#000', color: 'rgb(225,252,6)' }}>
-                <Icon name="check" className="w-5" />
-              </span>
-              <p className="t-h3">You&rsquo;re on the list.</p>
-            </div>
-          ) : (
-            <form className="w-full max-w-xl flex flex-col sm:flex-row gap-3"
-              onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
-              <input required type="email" placeholder="Your email" aria-label="Email for newsletter"
-                className="flex-1 h-[52px] rounded-xl px-4 w-full"
-                style={{ background: '#fff', border: '1px solid rgba(0,0,0,.15)', color: '#000' }} />
-              <button type="submit"
-                className="h-[52px] px-8 rounded-full text-[.92rem] whitespace-nowrap transition-transform hover:-translate-y-px"
-                style={{ background: '#000', color: '#fff' }}>
-                Subscribe
-              </button>
-            </form>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- SECTION 6: FINAL CTA ---------- */
-function FinalCTA() {
-  return (
-    <section id="contact" className="relative w-full z-[1] py-14 md:py-20">
-      <div className="container-x">
-        <div data-reveal className="relative overflow-hidden rounded-3xl px-6 py-16 md:py-24 flex flex-col items-center text-center gap-7"
-          style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
-          <div aria-hidden className="absolute -top-24 left-1/2 -translate-x-1/2 w-[60vw] aspect-square rounded-full blur-3xl opacity-30"
-            style={{ background: 'radial-gradient(circle, rgb(225,252,6) 25%, transparent 70%)' }} />
-
-          <h2 className="t-h2 uppercase max-w-[16ch]">Prefer talking to building?</h2>
-          <p className="t-body max-w-md" style={{ opacity: .72 }}>
-            2 hours. Free. No obligation. Just answers about whatever you&rsquo;ve been researching.
-          </p>
-          <a href="/#contact" className="btn-accent">
-            Book Free Consultation
-            <span className="btn-icon"><Icon name="arrow" className="w-4" /></span>
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- SECTION 2: FEATURED ARTICLE ---------- */
-const CAT_DANDAI = { color: '#22c55e', icon: 'spark' };
-
-function Featured() {
-  const [ref, val] = useCountUp(88, 1400);
-
-  return (
-    <section id="featured" className="relative w-full z-[1] py-14 md:py-20">
-      <div className="container-x">
-        <div data-reveal className="rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-2"
-          style={{ border: '1px solid var(--border)' }}>
-
-          <div className="relative min-h-[280px] lg:min-h-[520px] p-8 md:p-12 flex flex-col justify-between overflow-hidden"
-            style={{ background: 'linear-gradient(150deg, #0a0a0a 0%, #0a0a0a 45%, rgb(225,252,6) 135%)', color: '#fff' }}>
-            <Icon name="spark" className="absolute -bottom-10 -right-10 w-56 h-56" style={{ opacity: .08 }} />
-
-            <span className="chip t-chip self-start" style={{ background: 'var(--accent)', color: '#000' }}>Featured Insight</span>
-
-            <div ref={ref} className="flex flex-col gap-3">
-              <div className="t-stat tabular-nums leading-none" style={{ fontSize: 'clamp(4rem, 10vw, 7.5rem)' }}>
-                {val}<span style={{ fontSize: '.4em' }}>%</span>
-              </div>
-              <p className="t-body" style={{ color: 'rgba(255,255,255,.75)' }}>of companies use AI.</p>
-            </div>
-
-            <p className="t-small uppercase tracking-wide" style={{ color: 'rgba(255,255,255,.55)' }}>
-              Data &amp; AI · From our audit data
+    <section id="categories" className="pb-4 pt-4">
+      <div className={CONTAINER}>
+        <Reveal>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">
+              Browse by category
             </p>
-          </div>
 
-          <div className="p-8 md:p-12 flex flex-col gap-6 justify-between" style={{ background: 'var(--card)' }}>
-            <div className="flex flex-col gap-5">
-              <span className="inline-flex items-center gap-2 t-chip uppercase tracking-wide self-start" style={{ color: 'var(--muted)' }}>
-                <span className="w-2 h-2 rounded-full" style={{ background: CAT_DANDAI.color }} />
-                Data &amp; AI
-              </span>
-              <h2 className="t-h2-sm" style={{ lineHeight: 1.12 }}>
-                The 88% uses AI. That doesn&rsquo;t mean the 88% is creating value.
-              </h2>
-              <p className="t-body line-clamp-4" style={{ color: 'var(--muted)' }}>
-                Adoption was the easy part. Value is an engineering problem &mdash; and most dashboards are
-                measuring activity, not outcomes. What separates the AI projects that pay back from the
-                ones that just cost.
-              </p>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {CATEGORIES.map((item) => {
+                const active = category === item;
+
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setCategory(item)}
+                    className={`shrink-0 rounded-full border px-4 py-2.5 text-xs font-medium transition-colors ${
+                      active
+                        ? 'border-transparent bg-[var(--fg)] text-[var(--bg)]'
+                        : 'border-[var(--border)] bg-[color:var(--card)] text-[var(--muted)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
             </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t" style={{ borderColor: 'var(--border)' }}>
-                <div className="flex items-center gap-3">
-                  <span className="w-11 h-11 rounded-full flex items-center justify-center text-[13px] font-medium"
-                    style={{ background: 'var(--fg)', color: 'var(--bg)' }}>EM</span>
-                  <span className="flex flex-col">
-                    <span className="t-small">Elena M&aacute;rquez</span>
-                    <span className="t-chip" style={{ color: 'var(--muted)' }}>Head of Data &amp; AI</span>
-                  </span>
-                </div>
-                <p className="t-chip flex items-center gap-2" style={{ color: 'var(--muted)' }}>
-                  <Icon name="clock" className="w-3.5" /> 8 min read · September 23, 2026
+function ArticleGrid({ category, setCategory, query, setQuery }) {
+  const filteredArticles = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+
+    return ARTICLES.filter((article) => {
+      const categoryMatches = category === 'All' || article.category === category;
+      const queryMatches =
+        !normalized ||
+        [article.title, article.excerpt, article.author, article.category]
+          .join(' ')
+          .toLowerCase()
+          .includes(normalized);
+
+      return categoryMatches && queryMatches;
+    });
+  }, [category, query]);
+
+  return (
+    <section id="articles" className={SECTION}>
+      <div className={CONTAINER}>
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <Reveal>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
+              Article library
+            </p>
+            <h2 className="text-[clamp(2rem,5.5vw,4.8rem)] leading-none tracking-[-.05em]">
+              Ideas worth reading.
+            </h2>
+          </Reveal>
+
+          <Reveal delay={80} className="w-full max-w-md">
+            <div className="relative">
+              <SearchIcon className="pointer-events-none absolute left-4 top-1/2 w-4 -translate-y-1/2 text-[var(--muted)]" />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search articles..."
+                className="h-11 w-full rounded-full border border-[var(--border)] bg-[color:var(--card)] pl-11 pr-5 text-sm outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+              />
+            </div>
+          </Reveal>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {filteredArticles.map((article, index) => (
+            <Reveal key={article.id} delay={Math.min(index, 5) * 55}>
+              <ArticleCard article={article} index={index} />
+            </Reveal>
+          ))}
+        </div>
+
+        {filteredArticles.length === 0 && (
+          <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[color:var(--card)] px-6 py-12 text-center">
+            <p className="text-lg font-medium">No articles match that search.</p>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              Try another keyword or category.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('');
+                setCategory('All');
+              }}
+              className="mt-5 rounded-full bg-[var(--fg)] px-5 py-2.5 text-xs font-medium text-[var(--bg)]"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function MidNewsletter() {
+  return (
+    <section className={`${SECTION} bg-[color:var(--card)]`}>
+      <div className={CONTAINER}>
+        <Reveal>
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg)] p-6 sm:p-10 lg:p-12">
+            <div className="grid gap-8 lg:grid-cols-[1fr_.85fr] lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">
+                  Weekly newsletter
+                </p>
+                <h2 className="mt-3 max-w-[15ch] text-[clamp(2rem,4vw,3.8rem)] leading-[.98] tracking-[-.05em]">
+                  Get insights before your competitors do.
+                </h2>
+                <p className="mt-4 max-w-xl text-sm leading-6 text-[var(--muted)]">
+                  One email per week. Real engineering lessons. Unsubscribe anytime.
                 </p>
               </div>
 
-              {/* TODO: point at the real article URL */}
-              <a href="#" onClick={(e) => e.preventDefault()} className="btn-primary self-start">
-                Read Full Article
-                <span className="btn-icon"><Icon name="arrow" className="w-4" /></span>
-              </a>
+              <div>
+                <SubscribeForm compact />
+              </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-/* ---------- SECTION 1: HERO ---------- */
-function Hero({ query, setQuery }) {
-  const [subscribed, setSubscribed] = useState(false);
-
-  const submitSearch = (e) => {
-    e.preventDefault();
-    const el = document.getElementById('articles');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
+function FinalCTA() {
   return (
-    <section id="hero" className="relative w-full flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-20 overflow-hidden" style={{ minHeight: '100svh' }}>
-      <GlobalHeroBackground />
+    <section id="consultation" className="relative overflow-hidden py-20 sm:py-28">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,color-mix(in_srgb,var(--accent)_17%,transparent),transparent_36%),linear-gradient(180deg,var(--card),var(--bg))]"
+      />
 
-      <div className="container-x flex flex-col items-center gap-7 md:gap-9 text-center">
-        <nav aria-label="Breadcrumb" data-reveal className="t-chip flex items-center gap-2" style={{ color: 'var(--muted)' }}>
-          <a href="/" className="hover:opacity-70">Home</a>
-          <span>/</span>
-          <span style={{ color: 'var(--fg)' }}>Insights</span>
-        </nav>
+      <div className={`${CONTAINER} relative`}>
+        <Reveal>
+          <div className="mx-auto flex max-w-4xl flex-col items-center rounded-[2rem] border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--bg)_86%,transparent)] px-6 py-12 text-center backdrop-blur-xl sm:px-10 sm:py-16">
+            <p className="text-xs font-semibold uppercase tracking-[.17em] text-[var(--muted)]">
+              Talk to the team
+            </p>
+            <h2 className="mt-3 max-w-[11ch] text-[clamp(2.2rem,5.3vw,4.8rem)] leading-[.95] tracking-[-.05em]">
+              Prefer talking to building?
+            </h2>
+            <p className="mt-4 max-w-lg text-sm leading-6 text-[var(--muted)]">
+              Take the next step with a focused conversation about what you&apos;re trying to solve.
+            </p>
 
-        <h1 data-reveal style={{ '--d': '80ms' }} className="t-hero uppercase max-w-[16ch]">
-          Insights from <span className="hl-wipe">real engineering</span>
-        </h1>
-
-        <p data-reveal style={{ '--d': '160ms', color: 'var(--muted)' }} className="t-body max-w-lg">
-          No fluff. No buzzwords. Just what we&rsquo;ve learned building 2,000+ projects.
-        </p>
-
-        <form data-reveal style={{ '--d': '240ms' }} role="search" onSubmit={submitSearch}
-          className="relative w-full max-w-2xl">
-          <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ width: 18, height: 18, color: 'var(--muted)' }} />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search articles..."
-            aria-label="Search articles"
-            className={'field pad-l' + (query ? ' pad-r' : '')}
-          />
-          {query && (
-            <button type="button" onClick={() => setQuery('')} aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center hover:opacity-70"
-              style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
-              <Icon name="x" className="w-3" />
-            </button>
-          )}
-        </form>
-
-        {subscribed ? (
-          <div data-reveal style={{ '--d': '320ms' }} className="fade-in flex items-center gap-3 chip t-chip">
-            <span className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--accent)', color: '#000' }}>
-              <Icon name="check" className="w-3.5" />
-            </span>
-            You&rsquo;re in. Next issue lands Thursday.
+            <a
+              href="/contact"
+              className="group mt-7 inline-flex h-12 items-center gap-3 rounded-full bg-[var(--fg)] pl-5 pr-1.5 text-sm font-medium text-[var(--bg)]"
+            >
+              Book Free Consultation
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
+                <Icon
+                  name="arrow"
+                  className="w-4 transition-transform group-hover:translate-x-1"
+                />
+              </span>
+            </a>
           </div>
-        ) : (
-          <form data-reveal style={{ '--d': '320ms' }}
-            onSubmit={(e) => { e.preventDefault(); setSubscribed(true); }}
-            className="w-full max-w-2xl flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Icon name="mail" className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ width: 18, height: 18, color: 'var(--muted)' }} />
-              <input required type="email" placeholder="Your email" aria-label="Email for newsletter" className="field pad-l" />
-            </div>
-            <button type="submit" className="btn-sub">Subscribe</button>
-          </form>
-        )}
-
-        <p data-reveal style={{ '--d': '380ms', color: 'var(--muted)' }} className="t-chip">
-          One email per week · Unsubscribe anytime
-        </p>
-
-        <a data-reveal style={{ '--d': '460ms', background: 'var(--accent)' }} href="#featured" aria-label="Scroll down"
-          className="bob mt-1 w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center text-black">
-          <Icon name="arrow" className="w-4 rotate-90" />
-        </a>
+        </Reveal>
       </div>
     </section>
   );
 }
 
 export default function InsightsPage() {
-  const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
-
-  useSectionTabMemory([
-    { id: 'hero', title: 'Insights' },
-    { id: 'featured', title: 'Featured Article' },
-    { id: 'articles', title: 'All Articles' },
-    { id: 'subscribe', title: 'Newsletter' },
-    { id: 'contact', title: 'Talk to Us' }
-  ]);
-  useReveal();
+  const [query, setQuery] = useState('');
 
   return (
     <>
       <Hero query={query} setQuery={setQuery} />
-      <Featured />
-      <Articles
-        query={query}
-        setQuery={setQuery}
+      <FeaturedArticle />
+      <CategoryFilter category={category} setCategory={setCategory} />
+      <ArticleGrid
         category={category}
         setCategory={setCategory}
+        query={query}
+        setQuery={setQuery}
       />
-      <Band />
-      <Newsletter />
+      <MidNewsletter />
       <FinalCTA />
+
+      <style>{`
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            scroll-behavior: auto !important;
+          }
+        }
+      `}</style>
     </>
   );
 }

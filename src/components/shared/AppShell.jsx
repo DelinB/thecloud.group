@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollProgress, Atmosphere, CustomCursor } from './effects';
 import { GlobalNav } from './GlobalNav';
 import { SiteFooter } from './Footer';
+import Chatbot from '../chatbot/Chatbot';
 
 function useUrlKey() {
   const getKey = () => `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -53,6 +54,7 @@ export function AppShell({ children }) {
       <CustomCursor />
       <GlobalNav />
       <main>{children}</main>
+      <Chatbot />
       <SiteFooter />
     </div>
   );
