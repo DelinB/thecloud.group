@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#f0b323" />
+<title>AI Integration — TCG</title>
+
+<!-- Tailwind (Play CDN) -->
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          accent:  '#f0b323',
+          accent2: '#d19a00',
+          accent3: '#8a6500',
+        },
+        fontFamily: {
+          codec: ['codec-pro', 'system-ui', '-apple-system', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<!-- React + Babel -->
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"></script>
+
+<style>
+@font-face {
+  font-display: swap;
+  font-family: 'codec-pro';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F73ed8859cfe61a80695ca501ed94529112bbb4e4.woff2?generation=1790060408823232&alt=media') format('woff2');
+}
+
+/* ---------- THEME TOKENS ---------- */
+:root {
+  --bg: rgb(246 246 246);
+  --fg: #000000;
+  --muted: #5c5c5c;
+  --card: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --accent: #f0b323;
+  --accent-2: #d19a00;
+  --accent-3: #8a6500;
+  --accent-ink: #000000;
+  --accent-soft: rgba(240, 179, 35, 0.18);
+  --wave-end: #0a0a0a;
+  --vt-duration: 550ms;
+}
+.dark {
+  --bg: #0a0a0a;
+  --fg: #f5f5f5;
+  --muted: #a3a3a3;
+  --card: #161616;
+  --border: rgba(255, 255, 255, 0.10);
+  --accent: #f5bd35;
+  --accent-2: #d19a00;
+  --accent-3: #8a6500;
+  --accent-soft: rgba(245, 189, 53, 0.20);
+  --wave-end: #000000;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'codec-pro', system-ui, -apple-system, sans-serif;
+  transition: background-color .35s ease, color .35s ease;
+  -webkit-font-smoothing: antialiased;
+}
+html.vt-active body { transition: none; }
+#root { min-height: 100%; }
+section[id] { scroll-margin-top: 84px; }
+
+/* ---------- VIEW TRANSITION THEME SWITCH ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.vt-active::view-transition-group(root) {
+  animation-duration: var(--vt-duration);
+}
+html.vt-active::view-transition-new(root) {
+  clip-path: var(--vt-clip-from, circle(0% at 50% 50%));
+}
+
+/* ---------- GLASS TILES CANVAS ---------- */
+.glass-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: opacity .6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-canvas { transition: none; }
+}
+
+/* ---------- CUSTOM CURSOR ---------- */
+html.custom-cursor-on,
+html.custom-cursor-on body,
+html.custom-cursor-on body * { cursor: none !important; }
+html.custom-cursor-on input,
+html.custom-cursor-on textarea,
+html.custom-cursor-on select,
+html.custom-cursor-on [contenteditable="true"] { cursor: text !important; }
+
+.cursor-dot, .cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  border-radius: 50%;
+  will-change: transform;
+  opacity: 0;
+}
+.cursor-dot {
+  width: 6px; height: 6px; background: var(--fg);
+  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+  transition: width .25s ease, height .25s ease, background .25s ease, opacity .2s ease;
+}
+.cursor-ring {
+  width: 36px; height: 36px; border: 1.5px solid var(--fg);
+  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+  transition: width .3s cubic-bezier(.22,1,.36,1), height .3s cubic-bezier(.22,1,.36,1),
+              border-color .3s ease, background .3s ease, opacity .2s ease;
+}
+.cursor-dot.is-visible  { opacity: 1; }
+.cursor-ring.is-visible { opacity: .55; }
+.cursor-ring.is-visible.hovered {
+  width: 62px; height: 62px;
+  background: var(--accent); border-color: var(--accent);
+  opacity: .35;
+}
+.cursor-dot.is-visible.hovered { width: 0; height: 0; }
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot, .cursor-ring { display: none !important; }
+}
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(128,128,128,.25); border-radius: 9999px; }
+
+/* ---------- NOISE + VIGNETTE ---------- */
+.noise-overlay {
+  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  opacity: .035; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.dark .noise-overlay { opacity: .055; mix-blend-mode: screen; }
+.vignette {
+  position: fixed; inset: 0; z-index: 9997; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.05) 100%);
+}
+.dark .vignette { background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.35) 100%); }
+
+/* ---------- SCROLL PROGRESS ---------- */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999;
+  transform-origin: left center; background: var(--accent);
+  will-change: transform;
+  box-shadow: 0 0 12px var(--accent-soft);
+}
+
+/* ---------- MARQUEE ---------- */
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.marquee-mask {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+.marquee-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1vw, 18px);
+  width: max-content;
+  animation: marquee var(--marquee-dur, 60s) linear infinite;
+  will-change: transform;
+}
+.marquee-track.slow { --marquee-dur: 120s; }
+.marquee-mask:hover .marquee-track { animation-play-state: paused; }
+
+/* ---------- SCROLL REVEAL ---------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(34px);
+  transition:
+    opacity 1s cubic-bezier(.22,1,.36,1),
+    transform 1s cubic-bezier(.22,1,.36,1),
+    filter 1s cubic-bezier(.22,1,.36,1);
+  transition-delay: var(--d, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal="left"]  { transform: translateX(-44px); }
+[data-reveal="right"] { transform: translateX(44px); }
+[data-reveal="scale"] { transform: translateY(24px) scale(.94); }
+[data-reveal="blur"]  { filter: blur(14px); transform: translateY(20px); }
+[data-reveal].on { opacity: 1; transform: none; filter: none; }
+
+/* ---------- SPLIT TEXT ---------- */
+.split-line { display: block; overflow: hidden; line-height: .95; }
+.split-line > span {
+  display: inline-block;
+  transform: translateY(110%) rotate(4deg);
+  transform-origin: left bottom;
+  transition: transform 1.05s cubic-bezier(.22,1,.36,1);
+  transition-delay: var(--wd, 0ms);
+  will-change: transform;
+}
+.hero-ready .split-line > span { transform: translateY(0) rotate(0); }
+
+/* ---------- TEXT WIPE HIGHLIGHT ---------- */
+.hl-wipe {
+  background: var(--accent); color: var(--accent-ink);
+  padding: .02em .14em;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1s cubic-bezier(.22,1,.36,1) .45s;
+}
+[data-reveal].on .hl-wipe,
+.hero-ready .hl-wipe { clip-path: inset(0 -0.1em 0 0); }
+
+/* ---------- 85% BAR ---------- */
+.bar-seg { transform: scaleX(0); transform-origin: left center; transition: transform 1.3s cubic-bezier(.22,1,.36,1) .35s; }
+.bar-seg.s2 { transition-delay: 1.1s; }
+[data-reveal].on .bar-seg { transform: scaleX(1); }
+
+/* ---------- TIMELINE DOT PULSE ---------- */
+@keyframes dotPulse {
+  0%   { box-shadow: 0 0 0 0 var(--accent-soft); }
+  70%  { box-shadow: 0 0 0 12px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.poc-dot { animation: dotPulse 2.4s ease-out infinite; }
+
+/* ---------- PROCESS — MISSION CONTROL RAIL ---------- */
+.process-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+          mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+  opacity: .75;
+}
+.process-rail-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 5vw, 60px);
+}
+.process-rail {
+  position: relative;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+}
+.process-rail-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-2) 0%, var(--accent) 100%);
+  transform-origin: left center;
+  transition: transform .35s cubic-bezier(.22,1,.36,1);
+  box-shadow: 0 0 14px var(--accent-soft);
+}
+.process-rail-pulse {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: left .35s cubic-bezier(.22,1,.36,1);
+  z-index: 3;
+  pointer-events: none;
+}
+.process-rail-halo {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 62%);
+  opacity: .55;
+  filter: blur(4px);
+  animation: pulseHalo 1.9s ease-in-out infinite;
+}
+.process-rail-dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--bg), 0 0 14px var(--accent);
+}
+@keyframes pulseHalo {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: .55; }
+  50%      { transform: translate(-50%, -50%) scale(1.45); opacity: .22; }
+}
+.process-node {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+.process-node-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--border);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  transition: transform .45s cubic-bezier(.22,1,.36,1),
+              background .35s ease,
+              border-color .35s ease,
+              color .35s ease,
+              box-shadow .45s ease;
+}
+.process-node.is-active .process-node-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  transform: scale(1.18);
+  box-shadow: 0 0 0 6px var(--accent-soft);
+}
+.process-node.is-passed .process-node-dot {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: #fff;
+}
+.process-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border-radius: 18px;
+  padding: 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  transition:
+    transform .5s cubic-bezier(.22,1,.36,1),
+    border-color .4s ease,
+    box-shadow .5s ease;
+  will-change: transform;
+}
+.process-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow:
+    0 26px 55px -28px rgba(240, 179, 35, 0.35),
+    0 12px 30px -16px rgba(0, 0, 0, 0.18);
+}
+.process-card.is-active {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 26px 55px -28px rgba(240, 179, 35, 0.4),
+    0 12px 30px -16px rgba(0, 0, 0, 0.15);
+}
+.process-card-ghost {
+  position: absolute;
+  bottom: -14px;
+  right: -2px;
+  font-size: clamp(4rem, 6vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.06em;
+  color: var(--fg);
+  opacity: .05;
+  z-index: 0;
+  pointer-events: none;
+  transition: color .55s ease, opacity .55s ease, transform .6s cubic-bezier(.22,1,.36,1);
+}
+.process-card.is-active .process-card-ghost,
+.process-card:hover .process-card-ghost {
+  color: var(--accent);
+  opacity: .16;
+  transform: translateY(-4px) scale(1.04);
+}
+.process-card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.process-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.process-card-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .5s cubic-bezier(.22,1,.36,1), background .35s ease, box-shadow .4s ease;
+}
+.process-card:hover .process-card-icon { transform: rotate(-10deg) scale(1.08); }
+.process-card.is-active .process-card-icon {
+  background: var(--accent);
+  box-shadow: 0 0 0 5px var(--accent-soft);
+}
+.process-card-check {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--accent-ink);
+  animation: pop .45s cubic-bezier(.22,1,.36,1) both;
+}
+.process-card-week {
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.process-card-desc { flex-grow: 1; transition: color .35s ease; }
+.process-card.is-active .process-card-desc,
+.process-card:hover .process-card-desc { color: var(--fg); }
+
+.process-card-bullets {
+  list-style: none;
+  padding: 10px 0 0 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-top: 1px solid var(--border);
+}
+.process-card-bullets li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: .78rem;
+  line-height: 1.4;
+  color: var(--muted);
+  transition: color .35s ease, transform .35s cubic-bezier(.22,1,.36,1);
+}
+.process-card:hover .process-card-bullets li,
+.process-card.is-active .process-card-bullets li { color: var(--fg); }
+.process-card.is-active .process-card-bullets li { transform: translateX(2px); }
+.process-card-bullet-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.process-output {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  padding: 32px 28px;
+  border-radius: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.process-output::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 200%;
+  background: radial-gradient(ellipse, var(--accent-soft) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+.process-output > * { position: relative; z-index: 1; }
+.process-output-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.process-output-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 5px var(--accent-soft);
+}
+.process-output-headline { line-height: 1.15; max-width: 26ch; }
+
+@media (max-width: 767px) {
+  .process-rail-wrap { display: none; }
+  .process-card-ghost { font-size: 4.5rem; }
+}
+
+/* ---------- AI CARD — WAVE FILL ---------- */
+.ai-card {
+  position: relative;
+  width: 100%;
+  min-height: 230px;
+  background: var(--card);
+  border-radius: 18px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  isolation: isolate;
+  transition:
+    transform .5s cubic-bezier(.22,1,.36,1),
+    box-shadow .5s cubic-bezier(.22,1,.36,1),
+    border-color .35s ease;
+  will-change: transform;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.ai-card:hover,
+.ai-card:focus-visible {
+  transform: translateY(-6px);
+  box-shadow: 0 30px 60px -25px rgba(240, 179, 35, 0.35),
+              0 18px 40px -20px rgba(0, 0, 0, 0.35);
+  border-color: transparent;
+}
+.ai-card:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 30px 60px -25px rgba(240, 179, 35, 0.35);
+}
+.ai-card.is-active {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 30px 60px -25px rgba(240, 179, 35, 0.4),
+    0 18px 40px -20px rgba(0, 0, 0, 0.35);
+  border-color: transparent;
+  transform: translateY(-6px);
+}
+.ai-card__corner {
+  position: absolute;
+  top: 0; right: 0;
+  width: 110px; height: 110px;
+  background: var(--accent);
+  border-radius: 0 0 0 60px;
+  z-index: 1;
+  opacity: .16;
+  transition: opacity .4s ease;
+  pointer-events: none;
+}
+.ai-card__wave {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(225deg,
+    var(--accent) 0%,
+    var(--accent-2) 28%,
+    var(--accent-3) 58%,
+    var(--wave-end) 100%);
+  border-radius: 0 0 0 60px;
+  z-index: 1;
+  transform: scale(0);
+  transform-origin: top right;
+  transition:
+    transform .65s cubic-bezier(.5,0,.2,1),
+    border-radius .55s ease;
+  pointer-events: none;
+  will-change: transform;
+}
+.ai-card:hover .ai-card__wave,
+.ai-card:focus-visible .ai-card__wave,
+.ai-card.is-active .ai-card__wave {
+  transform: scale(1);
+  border-radius: 0;
+}
+.ai-card:hover .ai-card__corner,
+.ai-card:focus-visible .ai-card__corner,
+.ai-card.is-active .ai-card__corner { opacity: 0; }
+.ai-card__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  height: 100%;
+  flex: 1;
+}
+.ai-card__content > *:last-child { flex-grow: 1; }
+.ai-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    background .45s ease,
+    color .45s ease,
+    transform .5s cubic-bezier(.22,1,.36,1);
+}
+.ai-card:hover .ai-card__icon,
+.ai-card:focus-visible .ai-card__icon,
+.ai-card.is-active .ai-card__icon {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  transform: rotate(-8deg) scale(1.06);
+}
+.ai-card__num {
+  position: absolute;
+  top: 22px; right: 24px;
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--muted);
+  transition: color .4s ease, transform .5s cubic-bezier(.22,1,.36,1);
+  z-index: 3;
+}
+.ai-card:hover .ai-card__num,
+.ai-card:focus-visible .ai-card__num,
+.ai-card.is-active .ai-card__num {
+  color: rgba(0, 0, 0, .75);
+  transform: scale(1.08);
+}
+.dark .ai-card:hover .ai-card__num,
+.dark .ai-card:focus-visible .ai-card__num,
+.dark .ai-card.is-active .ai-card__num { color: rgba(255, 255, 255, .9); }
+.ai-card__title { transition: color .4s ease; }
+.ai-card__desc { color: var(--muted); transition: color .4s ease; }
+.ai-card:hover .ai-card__title,
+.ai-card:focus-visible .ai-card__title,
+.ai-card.is-active .ai-card__title,
+.ai-card:hover .ai-card__desc,
+.ai-card:focus-visible .ai-card__desc,
+.ai-card.is-active .ai-card__desc { color: #fff; }
+.ai-card__arrow {
+  position: absolute;
+  bottom: 22px; right: 24px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity .4s ease .08s, transform .5s cubic-bezier(.22,1,.36,1) .08s;
+  z-index: 4;
+  pointer-events: none;
+}
+.ai-card:hover .ai-card__arrow,
+.ai-card:focus-visible .ai-card__arrow,
+.ai-card.is-active .ai-card__arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ---------- HOVER-INVERT ROWS ---------- */
+.svc-row {
+  background: var(--card); border: 1px solid var(--border); color: var(--fg);
+  transition: background .35s ease, color .35s ease, border-color .35s ease, transform .35s cubic-bezier(.22,1,.36,1);
+  will-change: transform;
+}
+.svc-row:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); transform: translateY(-3px); }
+.svc-ico { background: var(--accent); color: var(--accent-ink); transition: transform .35s cubic-bezier(.22,1,.36,1); }
+.svc-row:hover .svc-ico { transform: rotate(-10deg) scale(1.06); }
+.svc-sub { color: var(--muted); transition: color .35s ease, opacity .35s ease; }
+.svc-row:hover .svc-sub { color: var(--bg); opacity: .72; }
+
+/* ---------- NAV ---------- */
+.nav-link { position: relative; }
+.nav-link::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -5px; height: 1.5px;
+  background: var(--fg); transform: scaleX(0); transform-origin: right center;
+  transition: transform .35s cubic-bezier(.22,1,.36,1);
+}
+.nav-link:hover::after { transform: scaleX(1); transform-origin: left center; }
+
+.chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 32px; padding: 0 14px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  background: var(--card);
+  color: var(--fg);
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 18px;
+  height: 52px; padding: 4px 6px 4px 24px;
+  border-radius: 9999px;
+  background: var(--fg); color: var(--bg);
+  font-size: .92rem; line-height: 1.4;
+  transition: opacity .18s ease;
+  will-change: transform;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-primary:hover { opacity: .92; }
+.btn-primary .btn-icon {
+  width: 40px; height: 40px; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--accent-ink);
+  transition: transform .4s cubic-bezier(.22,1,.36,1);
+}
+.btn-primary:hover .btn-icon { transform: rotate(-45deg); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 52px; padding: 0 26px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--card); color: var(--fg);
+  font-size: .92rem; line-height: 1.4;
+  transition: border-color .25s ease, transform .3s cubic-bezier(.22,1,.36,1);
+}
+.btn-ghost:hover { border-color: var(--fg); }
+.btn-ghost .btn-arrow { transition: transform .4s cubic-bezier(.22,1,.36,1); }
+.btn-ghost:hover .btn-arrow { transform: translateX(4px); }
+
+.link-arrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .95rem;
+  border-bottom: 1px solid var(--fg);
+  padding-bottom: 2px;
+  transition: gap .3s cubic-bezier(.22,1,.36,1), opacity .2s ease;
+}
+.link-arrow:hover { gap: 14px; opacity: .75; }
+
+.field {
+  width: 100%; height: 52px;
+  border-radius: 12px;
+  padding: 0 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: .95rem;
+}
+.field::placeholder { color: var(--muted); }
+.field:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.grad-anim { background-size: 220% 220% !important; animation: gradientShift 9s ease infinite; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.fade-in { animation: fadeUp .5s ease both; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+.bob { animation: bob 2s ease-in-out infinite; }
+@keyframes pop { 0% { transform: scale(.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.pop { animation: pop .4s cubic-bezier(.22,1,.36,1) both; }
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: .55; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.ai-card:focus-visible { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; filter: none !important; }
+  .hl-wipe { clip-path: none !important; }
+  .bar-seg { transform: none !important; }
+  .bob, .pop, .poc-dot, .grad-anim { animation: none !important; }
+  .split-line > span { transform: none !important; }
+  .cursor-dot, .cursor-ring { display: none !important; }
+  .process-rail-fill, .process-rail-pulse, .process-node-dot,
+  .process-card, .process-card-ghost { transition: none !important; }
+  .process-rail-halo { animation: none !important; }
+  .process-rail-fill { transform: scaleX(1) !important; }
+  .process-rail-pulse { left: 100% !important; }
+  .ai-card__wave { transition: none !important; }
+  .ai-card:hover .ai-card__wave,
+  .ai-card:focus-visible .ai-card__wave,
+  .ai-card.is-active .ai-card__wave { transform: scale(1); border-radius: 0; }
+  .ai-card, .ai-card__icon, .ai-card__num, .ai-card__arrow { transition: none !important; }
+}
+
+/* ---------- BOOT / ERROR ---------- */
+#boot {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); color: var(--fg); z-index: 999999;
+  font-family: 'codec-pro', system-ui, sans-serif;
+  transition: opacity .4s ease;
+}
+#boot.hide { opacity: 0; pointer-events: none; }
+#boot .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display:inline-block; margin: 0 4px; animation: pulse 1.2s infinite; }
+#boot .dot:nth-child(2){ animation-delay: .15s; }
+#boot .dot:nth-child(3){ animation-delay: .3s; }
+@keyframes pulse { 0%,100%{ transform: scale(.6); opacity:.4;} 50%{ transform: scale(1); opacity:1;} }
+#err {
+  position: fixed; inset: 0; z-index: 9999999;
+  background: #1a0000; color: #ff9e9e;
+  padding: 24px; overflow: auto;
+  font-family: ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.6;
+  white-space: pre-wrap; display: none;
+}
+.brand-logo { display: block; width: auto; object-fit: contain; }
+</style>
+</head>
+
+<body>
+<div id="boot"><div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+<div id="root"></div>
+<pre id="err"></pre>
+
+<script>
+window.addEventListener('error', function (e) {
+  var el = document.getElementById('err');
+  el.style.display = 'block';
+  el.textContent = 'Runtime error:\n\n' + (e.error && e.error.stack || e.message) +
+    (e.filename ? '\n\nAt: ' + e.filename + ':' + e.lineno : '');
+});
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+const LOGO_SRC = '';
+const BRAND_NAME = 'The Cloud Group';
+
+/* ============================================================
+   VIEW-TRANSITION THEME TOGGLE
+   ============================================================ */
+const VT_DURATION_MS = 550;
+
+function applyThemeClass(isDark) {
+  document.documentElement.classList.toggle('dark', isDark);
+  try { localStorage.setItem('tcg-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+}
+
+function runThemeTransition(isDark, originEl) {
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (typeof document.startViewTransition !== 'function' || reduce) {
+    applyThemeClass(isDark);
+    return;
+  }
+  if (root.classList.contains('vt-active')) {
+    applyThemeClass(isDark);
+    return;
+  }
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  let cx = vw / 2, cy = vh / 2;
+  if (originEl && originEl.getBoundingClientRect) {
+    const r = originEl.getBoundingClientRect();
+    if (r.width && r.height) {
+      cx = r.left + r.width / 2;
+      cy = r.top + r.height / 2;
+    }
+  }
+
+  const maxR = Math.hypot(Math.max(cx, vw - cx), Math.max(cy, vh - cy));
+  const rPct = (maxR / (Math.hypot(vw, vh) / Math.SQRT2)) * 100;
+  const cxPct = (cx / vw) * 100;
+  const cyPct = (cy / vh) * 100;
+
+  const clipFrom = `circle(0% at ${cxPct}% ${cyPct}%)`;
+  const clipTo   = `circle(${rPct}% at ${cxPct}% ${cyPct}%)`;
+
+  root.style.setProperty('--vt-duration', VT_DURATION_MS + 'ms');
+  root.style.setProperty('--vt-clip-from', clipFrom);
+  root.classList.add('vt-active');
+
+  const apply = () => applyThemeClass(isDark);
+
+  let cleanupDone = false;
+  const cleanup = () => {
+    if (cleanupDone) return;
+    cleanupDone = true;
+    root.classList.remove('vt-active');
+    root.style.removeProperty('--vt-clip-from');
+  };
+
+  let transition;
+  try {
+    transition = document.startViewTransition(apply);
+  } catch (e) {
+    cleanup();
+    applyThemeClass(isDark);
+    return;
+  }
+
+  if (transition.finished && typeof transition.finished.finally === 'function') {
+    transition.finished.finally(cleanup).catch(() => {});
+  } else {
+    setTimeout(cleanup, VT_DURATION_MS + 100);
+  }
+
+  if (transition.ready && typeof transition.ready.then === 'function') {
+    transition.ready.then(() => {
+      try {
+        root.animate(
+          { clipPath: [clipFrom, clipTo] },
+          {
+            duration: VT_DURATION_MS,
+            easing: 'ease-in-out',
+            fill: 'forwards',
+            pseudoElement: '::view-transition-new(root)'
+          }
+        );
+      } catch (e) { /* noop */ }
+    }).catch(() => {});
+  }
+}
+
+/* ---------- ICONS ---------- */
+const ICONS = {
+  arrow:     <path d="M5 12h14M13 6l6 6-6 6" />,
+  check:     <path d="M20 6L9 17l-5-5" />,
+  x:         <path d="M18 6L6 18M6 6l12 12" />,
+  storm:     <path d="M17.5 19a4.5 4.5 0 100-9 6 6 0 00-11.6 1.5A4 4 0 006 19h11.5zM13 12l-3 5h4l-3 5" />,
+  hurricane: <path d="M9.6 4.6A2 2 0 1111 8H2M12.6 19.4A2 2 0 1014 16H2M17.7 7.7A2.5 2.5 0 1119.5 12H2" />,
+  spark:     <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z" />,
+  shield:    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4" />,
+  clock:     <path d="M12 22a10 10 0 100-20 10 10 0 000 20zM12 6v6l4 2" />,
+  bot:       <path d="M12 6v2M6 10h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2zM9 14v2M15 14v2M2 14h2M20 14h2" />,
+  zap:       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />,
+  chart:     <path d="M3 3v18h18M7 14l4-4 3 3 5-6" />,
+  message:   <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />,
+  database:  <path d="M12 8c4.97 0 9-1.34 9-3s-4.03-3-9-3-9 1.34-9 3 4.03 3 9 3zM21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />,
+  heart:     <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />,
+  dollar:    <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />,
+  truck:     <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8zM5.5 21a2 2 0 100-4 2 2 0 000 4zM18.5 21a2 2 0 100-4 2 2 0 000 4z" />,
+  users:     <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />,
+  activity:  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />,
+  bag:       <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0" />
+};
+
+function Icon({ name, className, style }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      {ICONS[name]}
+    </svg>
+  );
+}
+
+function BrandMark({ variant = 'default' }) {
+  const isFooter = variant === 'footer';
+  if (LOGO_SRC) {
+    return <img src={LOGO_SRC} alt={BRAND_NAME} className="brand-logo" style={{ height: isFooter ? 30 : 26 }} />;
+  }
+  return (
+    <React.Fragment>
+      <span className="rounded-lg flex items-center justify-center font-bold text-[13px] shrink-0"
+        style={{ width: 28, height: 28, background: 'var(--accent)', color: 'var(--accent-ink)' }}>T</span>
+      <span className="leading-none" style={{ letterSpacing: '-.02em' }}>TCG</span>
+    </React.Fragment>
+  );
+}
+
+/* ============================================================
+   GLASS TILES — WEBGL HERO BACKGROUND
+   ============================================================ */
+const GLASS_VERT = `
+attribute vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+`;
+
+const GLASS_FRAG = `
+precision highp float;
+
+uniform vec2  uResolution;
+uniform float uTime;
+uniform float uSpeed;
+uniform float uTileDensity;
+uniform float uRippleLayers;
+uniform float uWarpStrength;
+uniform float uBandSharpness;
+uniform float uChromaticSpread;
+uniform vec3  uColorA;
+uniform vec3  uColorB;
+uniform vec3  uBackgroundColor;
+uniform float uOpacity;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
+float rippleField(vec2 dir, float dist, float tileRand) {
+  float sum = 0.0;
+  float norm = 0.0;
+  for (int i = 0; i < 8; i++) {
+    if (float(i) >= uRippleLayers) break;
+    float fi = float(i);
+    float freq = 2.5 + fi * 1.3;
+    float phase = uTime * uSpeed * (0.55 + 0.12 * fi) + tileRand * 6.2831853;
+    float angle = atan(dir.y, dir.x);
+    float weight = 1.0 / (fi + 1.0);
+    float wave = sin(dist * freq * 7.0 - phase) * cos(angle * 4.0 + phase * 0.5);
+    sum += wave * weight;
+    norm += weight;
+  }
+  return sum / max(norm, 0.0001);
+}
+
+vec3 tileColor(vec2 uv, float chromaShift) {
+  vec2 center = vec2(0.5);
+  vec2 toCenter = uv - center;
+  float aspect = uResolution.x / uResolution.y;
+  toCenter.x *= aspect;
+  float dist = length(toCenter) + 0.0001;
+  vec2 dir = toCenter / dist;
+
+  vec2 grid = uv * vec2(aspect, 1.0) * uTileDensity;
+  vec2 cellId = floor(grid);
+  vec2 localUV = fract(grid) - 0.5;
+  float tileRand = hash21(cellId);
+
+  float warp = (1.0 / (dist * 6.0 + 1.0)) * uWarpStrength * sin(uTime * uSpeed * 0.7 + tileRand * 6.2831853);
+  vec2 warpedDir = dir + localUV * warp * 0.6;
+
+  float field = rippleField(normalize(warpedDir + 0.0001), dist + warp, tileRand);
+  float band = pow(clamp((field + 1.0) * 0.5, 0.0, 1.0), max(uBandSharpness, 0.001));
+
+  float facet = 0.75 + 0.25 * hash21(cellId + 7.0);
+  float shimmer = 0.5 + 0.5 * sin(uTime * uSpeed * 2.4 + tileRand * 12.0);
+  float mixT = clamp(band * 0.72 + shimmer * 0.18 + chromaShift, 0.0, 1.0);
+
+  vec3 glass = mix(uColorA, uColorB, mixT) * facet;
+  vec3 result = mix(uBackgroundColor, glass, band);
+
+  float edge = smoothstep(0.48, 0.5, max(abs(localUV.x), abs(localUV.y)));
+  result *= (1.0 - edge * 0.28);
+
+  return result;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / uResolution.xy;
+
+  float cs = uChromaticSpread * 0.02;
+  vec3 rC = tileColor(uv + vec2(cs, 0.0), 0.04);
+  vec3 gC = tileColor(uv, 0.0);
+  vec3 bC = tileColor(uv - vec2(cs, 0.0), -0.04);
+
+  vec3 finalColor = vec3(rC.r, gC.g, bC.b);
+  gl_FragColor = vec4(finalColor, uOpacity);
+}
+`;
+
+const GLASS_PALETTES = {
+  light: {
+    bg: '#f6f6f6',
+    a:  '#ffd88a',
+    b:  '#e0a21b',
+    canvasOpacity: 0.55,
+    speed: 0.8, density: 7, ripples: 5, warp: 0.30, band: 3.2, chroma: 0.18
+  },
+  dark: {
+    bg: '#0a0a0a',
+    a:  '#5a4300',
+    b:  '#f5bd35',
+    canvasOpacity: 0.62,
+    speed: 0.8, density: 7, ripples: 5, warp: 0.30, band: 3.2, chroma: 0.18
+  }
+};
+
+function hexToRgbNorm(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255];
+}
+
+function GlassTilesBackground({ theme, className }) {
+  const pal = GLASS_PALETTES[theme] || GLASS_PALETTES.light;
+  const canvasRef = useRef(null);
+  const rafRef = useRef(0);
+  const drawRef = useRef(null);
+  const palRef = useRef(pal);
+
+  useEffect(() => {
+    palRef.current = pal;
+    if (drawRef.current) drawRef.current();
+  }, [pal]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const gl =
+      canvas.getContext('webgl', { alpha: false, antialias: false, depth: false, stencil: false }) ||
+      canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    const compile = (type, src) => {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.warn('[glass-tiles] shader:', gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    };
+
+    const vs = compile(gl.VERTEX_SHADER, GLASS_VERT);
+    const fs = compile(gl.FRAGMENT_SHADER, GLASS_FRAG);
+    if (!vs || !fs) return;
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.warn('[glass-tiles] link:', gl.getProgramInfoLog(prog));
+      return;
+    }
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+      gl.STATIC_DRAW
+    );
+    const aPos = gl.getAttribLocation(prog, 'aPos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    const U = {};
+    ['uResolution','uTime','uSpeed','uTileDensity','uRippleLayers','uWarpStrength',
+     'uBandSharpness','uChromaticSpread','uColorA','uColorB','uBackgroundColor','uOpacity']
+      .forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const maxDpr = reduce ? 1 : 1.5;
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+      const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
+      const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        gl.viewport(0, 0, w, h);
+      }
+    };
+
+    let elapsed = 12;
+
+    const draw = () => {
+      resize();
+      const p = palRef.current;
+      gl.uniform2f(U.uResolution, canvas.width, canvas.height);
+      gl.uniform1f(U.uTime, elapsed);
+      gl.uniform1f(U.uSpeed, p.speed);
+      gl.uniform1f(U.uTileDensity, p.density);
+      gl.uniform1f(U.uRippleLayers, p.ripples);
+      gl.uniform1f(U.uWarpStrength, p.warp);
+      gl.uniform1f(U.uBandSharpness, p.band);
+      gl.uniform1f(U.uChromaticSpread, p.chroma);
+      gl.uniform1f(U.uOpacity, 1.0);
+      gl.uniform3fv(U.uColorA, hexToRgbNorm(p.a));
+      gl.uniform3fv(U.uColorB, hexToRgbNorm(p.b));
+      gl.uniform3fv(U.uBackgroundColor, hexToRgbNorm(p.bg));
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    };
+
+    drawRef.current = draw;
+
+    let visible = true;
+    let last = performance.now();
+
+    const loop = (now) => {
+      if (!visible) { rafRef.current = 0; return; }
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      elapsed += dt;
+      draw();
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
+    if (!reduce) rafRef.current = requestAnimationFrame(loop);
+    else draw();
+
+    let io = null;
+    if ('IntersectionObserver' in window && !reduce) {
+      io = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible && !rafRef.current) {
+          last = performance.now();
+          rafRef.current = requestAnimationFrame(loop);
+        }
+      }, { threshold: 0 });
+      io.observe(canvas);
+    }
+
+    const onResize = () => { if (reduce) draw(); };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+      drawRef.current = null;
+      if (io) io.disconnect();
+      window.removeEventListener('resize', onResize);
+      gl.deleteBuffer(buf);
+      gl.deleteProgram(prog);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      const lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className={'glass-canvas ' + (className || '')}
+      style={{ opacity: pal.canvasOpacity }}
+    />
+  );
+}
+
+/* ============================================================
+   HOOKS
+   ============================================================ */
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-reveal]');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+const SECTIONS = [
+  { id: 'hero',       title: 'AI Integration' },
+  { id: 'reality',    title: 'The 85% Problem' },
+  { id: 'usecases',   title: 'Use Cases' },
+  { id: 'compare',    title: 'Why Us' },
+  { id: 'poc',        title: '4-Week POC' },
+  { id: 'industries', title: 'Industries' },
+  { id: 'guarantees', title: 'Guarantees' },
+  { id: 'faq',        title: 'FAQ' },
+  { id: 'contact',    title: 'AI Assessment' }
+];
+
+function useSectionTabMemory() {
+  useEffect(() => {
+    const tracked = SECTIONS.map((s) => ({ ...s, el: document.getElementById(s.id) })).filter((s) => s.el);
+    const io = new IntersectionObserver((entries) => {
+      const best = entries.filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!best) return;
+      const sec = tracked.find((s) => s.el === best.target);
+      if (sec) document.title = sec.title + ' — TCG';
+    }, { rootMargin: '-25% 0px -55% 0px', threshold: [0, 0.25, 0.5, 1] });
+    tracked.forEach((s) => io.observe(s.el));
+    return () => io.disconnect();
+  }, []);
+}
+
+function useCountUp(target, duration = 1500) {
+  const [val, setVal] = useState(0);
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVal(target); return;
+    }
+    let raf;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        const t0 = performance.now();
+        const tick = (t) => {
+          const p = Math.min((t - t0) / duration, 1);
+          setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
+          if (p < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.35 });
+    io.observe(el);
+    return () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); };
+  }, [target, duration]);
+  return [ref, val];
+}
+
+function BigCount() {
+  const [ref, val] = useCountUp(85, 1500);
+  return (
+    <div ref={ref} className="leading-none tabular-nums text-[clamp(5rem,15vw,11rem)] tracking-[-.05em]">
+      {val}<span style={{ fontSize: '.42em' }}>%</span>
+    </div>
+  );
+}
+
+function ScrollProgress() {
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    let raf;
+    const on = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight;
+        setP(max > 0 ? h.scrollTop / max : 0);
+        raf = null;
+      });
+    };
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    window.addEventListener('resize', on, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', on);
+      window.removeEventListener('resize', on);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+  return <div aria-hidden className="scroll-progress" style={{ transform: 'scaleX(' + p + ')' }} />;
+}
+
+function Atmosphere() {
+  return (
+    <React.Fragment>
+      <div className="noise-overlay" aria-hidden />
+      <div className="vignette" aria-hidden />
+    </React.Fragment>
+  );
+}
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+function CustomCursor() {
+  const dotRef  = useRef(null);
+  const ringRef = useRef(null);
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const fine   = window.matchMedia('(any-hover: hover) and (any-pointer: fine)');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const sync = () => {
+      const on = fine.matches && !reduce.matches;
+      setEnabled(on);
+      document.documentElement.classList.toggle('custom-cursor-on', on);
+    };
+    sync();
+
+    const add = (m, fn) => (m.addEventListener ? m.addEventListener('change', fn) : m.addListener(fn));
+    const del = (m, fn) => (m.removeEventListener ? m.removeEventListener('change', fn) : m.removeListener(fn));
+    add(fine, sync);
+    add(reduce, sync);
+
+    return () => {
+      del(fine, sync);
+      del(reduce, sync);
+      document.documentElement.classList.remove('custom-cursor-on');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const dot  = dotRef.current;
+    const ring = ringRef.current;
+    if (!dot || !ring) return;
+
+    let mx = -100, my = -100;
+    let rx = -100, ry = -100;
+    let raf = 0;
+    let started = false;
+
+    const show = () => {
+      dot.classList.add('is-visible');
+      ring.classList.add('is-visible');
+    };
+    const hide = () => {
+      dot.classList.remove('is-visible');
+      ring.classList.remove('is-visible');
+    };
+    const place = (el, x, y) => {
+      el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+    };
+
+    const onMove = (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      if (!started) {
+        started = true;
+        rx = mx; ry = my;
+        place(ring, rx, ry);
+        show();
+      }
+      place(dot, mx, my);
+    };
+
+    const onOver = (e) => {
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      if (t.closest('input, textarea, select, [contenteditable="true"]')) {
+        hide(); return;
+      }
+      show();
+      const interactive = t.closest(
+        'a, button, [role="button"], .chip, .ai-card, .svc-row, .process-card, label, summary'
+      );
+      dot.classList.toggle('hovered', !!interactive);
+      ring.classList.toggle('hovered', !!interactive);
+    };
+
+    const onLeaveDoc = () => hide();
+    const onEnterDoc = () => { if (started) show(); };
+
+    const loop = () => {
+      rx += (mx - rx) * 0.16;
+      ry += (my - ry) * 0.16;
+      place(ring, rx, ry);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+
+    window.addEventListener('mousemove', onMove, { passive: true });
+    window.addEventListener('mouseover', onOver, { passive: true });
+    document.addEventListener('mouseleave', onLeaveDoc);
+    document.addEventListener('mouseenter', onEnterDoc);
+    window.addEventListener('blur', hide);
+    window.addEventListener('focus', onEnterDoc);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseover', onOver);
+      document.removeEventListener('mouseleave', onLeaveDoc);
+      document.removeEventListener('mouseenter', onEnterDoc);
+      window.removeEventListener('blur', hide);
+      window.removeEventListener('focus', onEnterDoc);
+    };
+  }, [enabled]);
+
+  if (!enabled) return null;
+
+  return ReactDOM.createPortal(
+    <React.Fragment>
+      <div ref={dotRef}  className="cursor-dot"  aria-hidden="true" />
+      <div ref={ringRef} className="cursor-ring" aria-hidden="true" />
+    </React.Fragment>,
+    document.body
+  );
+}
+
+function Magnetic({ children, className, href, strength = 0.2, style, ...rest }) {
+  const ref = useRef(null);
+  const onMove = (e) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    el.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+  };
+  const onLeave = () => { if (ref.current) ref.current.style.transform = ''; };
+  const Cmp = href ? 'a' : 'button';
+  return (
+    <Cmp ref={ref} href={href} className={className} onMouseMove={onMove} onMouseLeave={onLeave}
+      style={{ transition: 'transform .4s cubic-bezier(.22,1,.36,1)', ...style }} {...rest}>
+      {children}
+    </Cmp>
+  );
+}
+
+function SplitLines({ lines, startDelay = 100 }) {
+  return (
+    <React.Fragment>
+      {lines.map((line, i) => (
+        <span key={i} className="split-line" style={{ '--wd': (startDelay + i * 130) + 'ms' }}>
+          <span>{line}</span>
+        </span>
+      ))}
+    </React.Fragment>
+  );
+}
+
+function MarqueeHeader({ text }) {
+  return (
+    <div className="marquee-mask w-full py-6 md:py-10" data-reveal>
+      <div className="marquee-track slow">
+        {[0, 1, 2, 3].map((i) => (
+          <React.Fragment key={i}>
+            <h2 className="uppercase whitespace-nowrap text-[clamp(3rem,12vw,11rem)] leading-[.9] tracking-[-.06em]"
+              style={{ color: 'var(--fg)', opacity: .92 }}>{text}</h2>
+            <span className="w-4 h-4 md:w-7 md:h-7 rounded-full shrink-0" style={{ background: 'var(--accent)' }} />
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+const NAV_LINKS = [
+  { label: 'Home',      href: 'index.html' },
+  { label: 'Use cases', href: '#usecases' },
+  { label: 'Process',   href: '#poc' },
+  { label: 'FAQ',       href: '#faq' }
+];
+
+function Nav({ theme, setTheme }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const lightBtnRef = useRef(null);
+  const darkBtnRef  = useRef(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  const switchTo = (next, originEl) => {
+    if (next === theme) return;
+    runThemeTransition(next === 'dark', originEl);
+    setTheme(next);
+  };
+
+  return (
+    <React.Fragment>
+      <header className={'fixed top-0 inset-x-0 z-[90] transition-all duration-500 ' +
+        (scrolled ? 'backdrop-blur-md bg-black/5 border-b border-[color:var(--border)]' : '')}>
+        <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] flex items-center justify-between h-[60px] md:h-[72px]">
+          <div className="flex items-center gap-5">
+            <a href="index.html" className="flex items-center gap-2.5 text-[13px] md:text-[14px]">
+              <BrandMark />
+            </a>
+            <span className="hidden sm:inline text-[clamp(.75rem,.85vw,.86rem)] px-3 py-1 rounded-full"
+              style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+              AI Integration
+            </span>
+          </div>
+
+          <ul className="hidden lg:flex items-center gap-6 text-[13px] md:text-[14px]">
+            {NAV_LINKS.map((l) => (
+              <li key={l.label}>
+                <a href={l.href} className="nav-link inline-flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative flex items-center h-9 sm:h-10 rounded-full p-1"
+              style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
+              <button
+                ref={lightBtnRef}
+                onClick={(e) => switchTo('light', e.currentTarget)}
+                aria-label="Light mode"
+                aria-pressed={theme === 'light'}
+                className="relative z-10 px-3 sm:px-4 h-full text-[12px] sm:text-[13px] rounded-full"
+                style={{ color: theme === 'light' ? 'var(--fg)' : 'rgba(0,0,0,.55)' }}>Light</button>
+              <button
+                ref={darkBtnRef}
+                onClick={(e) => switchTo('dark', e.currentTarget)}
+                aria-label="Dark mode"
+                aria-pressed={theme === 'dark'}
+                className="relative z-10 px-3 sm:px-4 h-full text-[12px] sm:text-[13px] rounded-full"
+                style={{ color: theme === 'dark' ? 'var(--fg)' : 'rgba(255,255,255,.6)' }}>Dark</button>
+              <span className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
+                style={{ background: 'var(--bg)', left: theme === 'light' ? '4px' : 'calc(50% + 0px)' }} />
+            </div>
+
+            <Magnetic href="#contact"
+              className="hidden sm:inline-flex items-center gap-3 h-10 md:h-11 pl-4 md:pl-5 pr-1 rounded-full text-[13px] md:text-[14px]"
+              style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
+              AI assessment
+              <span className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center"
+                style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+                <Icon name="arrow" className="w-3.5" />
+              </span>
+            </Magnetic>
+
+            <button onClick={() => setOpen(!open)} aria-label="Menu"
+              className="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-full border"
+              style={{ borderColor: 'var(--border)' }}>
+              <span className={'block w-4 h-[1.5px] transition-transform ' + (open ? 'translate-y-[6px] rotate-45' : '')} style={{ background: 'currentColor' }} />
+              <span className={'block w-4 h-[1.5px] transition-opacity ' + (open ? 'opacity-0' : '')} style={{ background: 'currentColor' }} />
+              <span className={'block w-4 h-[1.5px] transition-transform ' + (open ? '-translate-y-[6px] -rotate-45' : '')} style={{ background: 'currentColor' }} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className={'fixed inset-0 z-[89] lg:hidden transition-opacity duration-300 ' + (open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')}>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
+        <nav className={'absolute top-[60px] inset-x-0 border-b p-6 pt-4 transition-transform duration-500 ' + (open ? 'translate-y-0' : '-translate-y-4')}
+          style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}>
+          <ul className="flex flex-col gap-1">
+            {NAV_LINKS.map((l) => (
+              <li key={l.label}>
+                <a href={l.href} onClick={() => setOpen(false)} className="block py-3 text-2xl border-b" style={{ borderColor: 'var(--border)' }}>{l.label}</a>
+              </li>
+            ))}
+          </ul>
+          <a href="#contact" onClick={() => setOpen(false)}
+            className="mt-6 flex items-center justify-between h-12 pl-5 pr-1 rounded-full"
+            style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
+            AI assessment
+            <span className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+              <Icon name="arrow" className="w-4" />
+            </span>
+          </a>
+        </nav>
+      </div>
+    </React.Fragment>
+  );
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+function Hero({ theme }) {
+  const [ready, setReady] = useState(false);
+  const [par, setPar] = useState(0);
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 80);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let raf;
+    const on = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => { setPar(window.scrollY); raf = null; });
+    };
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => { window.removeEventListener('scroll', on); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+
+  return (
+    <section id="hero"
+      className={'relative w-full flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden ' + (ready ? 'hero-ready' : '')}
+      style={{ minHeight: '100svh' }}>
+
+      <div aria-hidden className="absolute inset-0 z-0 pointer-events-none">
+        <GlassTilesBackground theme={theme} />
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(to bottom, var(--bg) 0%, transparent 18%, transparent 58%, var(--bg) 100%)'
+        }} />
+      </div>
+
+      <div aria-hidden
+        className="absolute z-0 top-0 right-0 w-[60vw] md:w-[42vw] aspect-square rounded-full blur-3xl opacity-20 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, var(--accent) 20%, transparent 70%)', transform: `translate3d(0, ${par * 0.18}px, 0)` }} />
+
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] relative z-10 flex flex-col items-center gap-8 md:gap-10 text-center">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[clamp(.75rem,.85vw,.86rem)]"
+          style={{
+            color: 'var(--muted)',
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'none' : 'translateY(14px)',
+            transition: 'opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1)'
+          }}>
+          <a href="index.html" className="hover:opacity-70">Home</a>
+          <span>/</span><span>Services</span><span>/</span>
+          <span style={{ color: 'var(--fg)' }}>AI Integration</span>
+        </nav>
+
+        <div className="flex flex-wrap justify-center gap-2"
+          style={{
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'none' : 'translateY(14px)',
+            transition: 'opacity .8s cubic-bezier(.22,1,.36,1) .1s, transform .8s cubic-bezier(.22,1,.36,1) .1s'
+          }}>
+          <span className="chip text-[clamp(.75rem,.85vw,.86rem)] gap-2" style={{ border: '1px solid var(--border)' }}>
+            <Icon name="spark" className="w-4" /> AI Consulting
+          </span>
+          <span className="chip text-[clamp(.75rem,.85vw,.86rem)] gap-2" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+            <Icon name="clock" className="w-4" /> POC in 4 Weeks
+          </span>
+        </div>
+
+        <h1 className="uppercase max-w-[20ch] text-[clamp(2.2rem,7.5vw,6.2rem)] leading-[.95] tracking-[-.045em] font-normal">
+          <SplitLines lines={['AI that pays', 'for itself.', "In 4 weeks, you'll"]} startDelay={180} />
+          <span className="split-line" style={{ '--wd': '590ms' }}>
+            <span><span className="hl-wipe">know exactly how.</span></span>
+          </span>
+        </h1>
+
+        <p className="max-w-xl text-center text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]"
+          style={{
+            color: 'var(--muted)',
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'none' : 'translateY(18px)',
+            transition: 'opacity .9s cubic-bezier(.22,1,.36,1) .7s, transform .9s cubic-bezier(.22,1,.36,1) .7s'
+          }}>
+          We don&rsquo;t sell AI as magic. We integrate it where it reduces costs and generates measurable ROI &mdash; then prove it with a working proof of concept.
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-3"
+          style={{
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'none' : 'translateY(18px)',
+            transition: 'opacity .9s cubic-bezier(.22,1,.36,1) .85s, transform .9s cubic-bezier(.22,1,.36,1) .85s'
+          }}>
+          <Magnetic href="#contact" className="btn-primary">
+            Get Free AI Assessment
+            <span className="btn-icon"><Icon name="arrow" className="w-4" /></span>
+          </Magnetic>
+          <a href="#usecases" className="btn-ghost">
+            See AI Use Cases
+            <Icon name="arrow" className="w-4 btn-arrow" />
+          </a>
+        </div>
+
+        <a href="#reality" aria-label="Scroll down"
+          className="relative mt-2 w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center"
+          style={{
+            background: 'var(--accent)',
+            color: 'var(--accent-ink)',
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'none' : 'translateY(20px)',
+            transition: 'opacity .9s cubic-bezier(.22,1,.36,1) 1.05s, transform .9s cubic-bezier(.22,1,.36,1) 1.05s'
+          }}>
+          <span aria-hidden className="absolute inset-0 rounded-full"
+            style={{ background: 'var(--accent)', animation: 'pulseRing 2.4s ease-out infinite' }} />
+          <Icon name="arrow" className="relative w-4 rotate-90" />
+        </a>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   REALITY CHECK
+   ============================================================ */
+function RealityCheck() {
+  return (
+    <section id="reality" className="relative w-full z-[1] py-14 md:py-20">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] flex flex-col items-center gap-9 md:gap-12">
+        <h2 data-reveal="blur" className="uppercase text-center text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">
+          The 85% problem
+        </h2>
+
+        <div data-reveal style={{ '--d': '80ms' }} className="flex flex-col items-center gap-3 text-center">
+          <BigCount />
+          <p className="max-w-md text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">of enterprise AI projects never reach production.</p>
+        </div>
+
+        <div data-reveal="scale" style={{ '--d': '160ms' }} className="w-full max-w-3xl">
+          <div className="flex flex-col items-end mb-2.5">
+            <span className="chip text-[clamp(.75rem,.85vw,.86rem)] gap-2 font-medium"
+              style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+              <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-ink)' }} />
+              We&rsquo;re the 15%
+            </span>
+            <span aria-hidden className="block w-px h-3.5 mr-5" style={{ background: 'var(--muted)' }} />
+          </div>
+
+          <div className="w-full h-12 md:h-14 rounded-full overflow-hidden flex" style={{ border: '1px solid var(--border)' }}>
+            <div className="bar-seg" style={{ width: '85%', background: '#ef4444' }} />
+            <div className="bar-seg s2" style={{ width: '15%', background: 'var(--accent)' }} />
+          </div>
+
+          <div className="flex justify-between mt-2.5 text-[clamp(.78rem,.9vw,.88rem)]" style={{ color: 'var(--muted)' }}>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#ef4444' }} />
+              85% fail &mdash; never reach production
+            </span>
+            <span className="flex items-center gap-2 text-right">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--accent)' }} />
+              15% ship
+            </span>
+          </div>
+        </div>
+
+        <p data-reveal="blur" style={{ '--d': '120ms' }}
+          className="uppercase text-center max-w-[24ch] text-[clamp(1.75rem,4.2vw,3.7rem)] font-normal"
+          style2="">
+          Not because AI fails &mdash; because{' '}
+          <span className="hl-wipe">nobody engineered the integration.</span>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   USE CASES
+   ============================================================ */
+const USE_CASES = [
+  { icon: 'bot',      title: 'Agents & Bots',     sub: 'Customer service, internal assistants.' },
+  { icon: 'zap',      title: 'Automation',        sub: 'Email, documents, data, workflow.' },
+  { icon: 'chart',    title: 'Prediction & ML',   sub: 'Demand forecasting, fraud detection.' },
+  { icon: 'message',  title: 'NLP & Language',    sub: 'Sentiment, classification, extraction.' },
+  { icon: 'database', title: 'Data Intelligence', sub: 'Smart dashboards on your own data.' },
+  { icon: 'shield',   title: 'AI Safety',         sub: 'Secure AI agents and data.' }
+];
+
+function AICard({ item, index, active, onActivate }) {
+  const handleClick = () => onActivate(item.title);
+  const handleKey = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onActivate(item.title);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      onKeyDown={handleKey}
+      aria-pressed={active}
+      className={'ai-card group ' + (active ? 'is-active' : '')}
+    >
+      <span className="ai-card__corner" aria-hidden />
+      <span className="ai-card__wave" aria-hidden />
+      <span className="ai-card__num" aria-hidden>0{index + 1}</span>
+
+      <div className="ai-card__content">
+        <span className="ai-card__icon">
+          <Icon name={item.icon} className="w-5" />
+        </span>
+        <span className="flex flex-col gap-1.5">
+          <h3 className="ai-card__title text-[clamp(1.15rem,1.8vw,1.5rem)] leading-[1.15] tracking-[-.02em] font-normal">{item.title}</h3>
+          <p className="ai-card__desc text-[clamp(.78rem,.9vw,.88rem)] leading-[1.5]">{item.sub}</p>
+        </span>
+      </div>
+
+      <span className="ai-card__arrow" aria-hidden>
+        <Icon name="arrow" style={{ width: 14, height: 14 }} />
+      </span>
+    </button>
+  );
+}
+
+function UseCases() {
+  const [activeCard, setActiveCard] = useState('AI Safety');
+
+  return (
+    <section id="usecases" className="relative w-full z-[1] py-14 md:py-20">
+      <MarqueeHeader text="where does ai fit" />
+
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] mt-10 md:mt-16 flex flex-col gap-10 md:gap-14">
+        <h2 data-reveal="blur"
+          className="uppercase text-center max-w-[20ch] mx-auto text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">
+          Where does AI fit your business?
+        </h2>
+
+        <div
+          role="group"
+          aria-label="AI use case categories"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto w-full"
+        >
+          {USE_CASES.map((u, i) => (
+            <div key={u.title} data-reveal="scale" style={{ '--d': (i * 90) + 'ms', display: 'flex' }}>
+              <AICard
+                item={u}
+                index={i}
+                active={activeCard === u.title}
+                onActivate={setActiveCard}
+              />
+            </div>
+          ))}
+        </div>
+
+        <p data-reveal className="text-center text-[clamp(.78rem,.9vw,.88rem)] leading-[1.5]" style={{ color: 'var(--muted)' }}>
+          Tap a card to focus a use case &mdash; or{' '}
+          <a href="#contact" className="underline" style={{ color: 'var(--fg)' }}>book a free assessment</a>{' '}
+          and we&rsquo;ll map the right fit for you.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   COMPARISON
+   ============================================================ */
+const CONSULTANTS = ['Sell chatbots as \u201CAI\u201D', 'POC never reaches production', 'No engineering background', 'Disappear after delivery'];
+const TCG_SIDE    = ['Find ROI before code', 'POC in production', '10+ years engineering', 'Monitor + retrain'];
+
+function Comparison() {
+  return (
+    <section id="compare" className="relative w-full z-[1] py-14 md:py-20">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] flex flex-col gap-10 md:gap-14">
+        <h2 data-reveal="blur"
+          className="uppercase text-center max-w-[22ch] mx-auto text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">
+          Why AI projects fail &mdash; and why ours don&rsquo;t
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-4xl mx-auto w-full">
+          <div data-reveal="left" className="rounded-2xl p-6 md:p-8 flex flex-col gap-6"
+            style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <p className="uppercase text-[clamp(1.15rem,1.8vw,1.5rem)] font-normal" style={{ color: 'var(--muted)' }}>AI Consultants</p>
+            <ul className="flex flex-col gap-4">
+              {CONSULTANTS.map((t) => (
+                <li key={t} className="flex items-center gap-3.5">
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ border: '1px solid var(--border)', color: 'var(--muted)' }}>
+                    <Icon name="x" className="w-3.5" />
+                  </span>
+                  <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">{t}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div data-reveal="right" style={{ '--d': '120ms', background: 'var(--fg)', color: 'var(--bg)' }}
+            className="relative overflow-hidden rounded-2xl p-6 md:p-8 flex flex-col gap-6">
+            <div aria-hidden className="absolute -bottom-20 -right-20 w-72 aspect-square rounded-full blur-3xl opacity-30"
+              style={{ background: 'radial-gradient(circle, var(--accent) 30%, transparent 70%)' }} />
+            <p className="uppercase relative text-[clamp(1.15rem,1.8vw,1.5rem)] font-normal">TCG</p>
+            <ul className="flex flex-col gap-4 relative">
+              {TCG_SIDE.map((t, i) => (
+                <li key={t} className="flex items-center gap-3.5"
+                  style={{ animation: 'fadeUp .6s cubic-bezier(.22,1,.36,1) both', animationDelay: (200 + i * 90) + 'ms' }}>
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+                    <Icon name="check" className="w-4" />
+                  </span>
+                  <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">{t}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   PROCESS — MISSION CONTROL RAIL
+   ============================================================ */
+const POC_STEPS = [
+  { n: '01', week: 'Week 1', title: 'Analyze',   icon: 'chart', desc: 'We audit your data and map the ROI before any code is written.', bullets: ['Data audit', 'ROI map', 'Success metric'] },
+  { n: '02', week: 'Week 2', title: 'Roadmap',   icon: 'spark', desc: 'You get a fixed plan: architecture, model choices, cost, timeline.', bullets: ['Architecture', 'Model choices', 'Fixed price'] },
+  { n: '03', week: 'Week 3', title: 'Build',     icon: 'bot',   desc: 'We wire the AI into your stack with guardrails and eval tests.', bullets: ['Integration', 'Guardrails', 'Eval tests'] },
+  { n: '04', week: 'Week 4', title: 'Working AI',icon: 'zap',   desc: 'Demo day. Real inputs, real outputs, on your infrastructure.', bullets: ['Live demo', 'Handover', 'Monitoring plan'] }
+];
+
+function Process() {
+  const [progress, setProgress] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setProgress(1);
+      setActiveIdx(POC_STEPS.length - 1);
+      return;
+    }
+    let raf;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const startY = vh * 0.85;
+        const endY = vh * 0.15;
+        const raw = (startY - rect.top) / (startY - endY);
+        const p = Math.min(Math.max(raw, 0), 1);
+        setProgress(p);
+        setActiveIdx(Math.min(Math.floor(p * POC_STEPS.length), POC_STEPS.length - 1));
+        raf = null;
+      });
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <section id="poc" ref={sectionRef} className="relative w-full z-[1] py-14 md:py-20 overflow-hidden">
+      <div className="process-grid" aria-hidden />
+
+      <MarqueeHeader text="from idea to working ai" />
+
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] mt-10 md:mt-16 flex flex-col gap-12 md:gap-16 relative">
+        <div className="flex flex-col items-center gap-5 text-center max-w-2xl mx-auto">
+          <h2 data-reveal="blur" className="uppercase max-w-[22ch] text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">
+            From idea to working AI in 4 weeks
+          </h2>
+          <p data-reveal style={{ '--d': '120ms', color: 'var(--muted)' }}
+            className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">
+            Same four weeks. A working AI running on your data — not a slide deck.
+          </p>
+        </div>
+
+        <div data-reveal className="process-rail-wrap">
+          <div className="process-rail">
+            <div className="process-rail-fill" style={{ transform: `scaleX(${progress})` }} />
+            <div className="process-rail-pulse" style={{ left: `${progress * 100}%` }}>
+              <span className="process-rail-halo" />
+              <span className="process-rail-dot" />
+            </div>
+
+            {POC_STEPS.map((s, i) => (
+              <div
+                key={s.n}
+                className={
+                  'process-node ' +
+                  (i === activeIdx ? 'is-active ' : '') +
+                  (i < activeIdx ? 'is-passed' : '')
+                }
+                style={{ left: `${(i / (POC_STEPS.length - 1)) * 100}%` }}
+                aria-hidden
+              >
+                <span className="process-node-dot">
+                  {i < activeIdx ? <Icon name="check" style={{ width: 12, height: 12 }} /> : s.n}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {POC_STEPS.map((s, i) => {
+            const isActive = i === activeIdx;
+            const isPassed = i < activeIdx;
+            return (
+              <div key={s.n} data-reveal="scale" style={{ '--d': (i * 120) + 'ms', display: 'flex' }}>
+                <article className={'process-card ' + (isActive ? 'is-active ' : '') + (isPassed ? 'is-passed' : '')}>
+                  <span className="process-card-ghost" aria-hidden>{s.n}</span>
+
+                  <div className="process-card-content">
+                    <div className="process-card-head">
+                      <span className="process-card-icon">
+                        <Icon name={s.icon} className="w-5" />
+                      </span>
+                      {isPassed && (
+                        <span className="process-card-check" aria-hidden>
+                          <Icon name="check" style={{ width: 12, height: 12 }} />
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="process-card-week">{s.week}</p>
+                    <h3 className="process-card-title text-[clamp(1.15rem,1.8vw,1.5rem)] leading-[1.15] tracking-[-.02em] font-normal">{s.title}</h3>
+                    <p className="process-card-desc text-[clamp(.78rem,.9vw,.88rem)] leading-[1.5]" style={{ color: 'var(--muted)' }}>
+                      {s.desc}
+                    </p>
+
+                    <ul className="process-card-bullets">
+                      {s.bullets.map((b) => (
+                        <li key={b}>
+                          <span className="process-card-bullet-dot" />
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              </div>
+            );
+          })}
+        </div>
+
+        <div data-reveal className="process-output">
+          <div className="process-output-left">
+            <span className="process-output-icon">
+              <Icon name="check" className="w-4" />
+            </span>
+            <p className="uppercase tracking-wide text-[clamp(1.15rem,1.8vw,1.5rem)] font-normal" style={{ color: 'var(--muted)' }}>
+              Output: Working AI on{' '}
+              <span style={{ color: 'var(--fg)' }}>YOUR data.</span>
+            </p>
+          </div>
+          <p className="process-output-headline uppercase text-[clamp(1.75rem,4.2vw,3.7rem)] font-normal">
+            Not a slide. Not a prototype.{' '}
+            <span className="hl-wipe">Working AI.</span>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   INDUSTRIES
+   ============================================================ */
+const INDUSTRIES = [
+  { icon: 'dollar',   label: 'Fintech',   apps: 'Fraud detection, credit scoring' },
+  { icon: 'truck',    label: 'Logistics', apps: 'Route optimization, demand forecasting' },
+  { icon: 'users',    label: 'HR',        apps: 'CV screening, matching, onboarding' },
+  { icon: 'activity', label: 'Pharma',    apps: 'Trial analysis, diagnosis support' },
+  { icon: 'bag',      label: 'Retail',    apps: 'Recommendations, dynamic pricing' },
+  { icon: 'zap',      label: 'Energy',    apps: 'Predictive maintenance' }
+];
+
+function Industries() {
+  return (
+    <section id="industries" className="relative w-full z-[1] py-14 md:py-20">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] flex flex-col gap-10 md:gap-14">
+        <div className="flex flex-col items-center gap-5 text-center max-w-2xl mx-auto">
+          <h2 data-reveal="blur" className="uppercase text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">
+            AI in your industry
+          </h2>
+          <p data-reveal style={{ '--d': '90ms', color: 'var(--muted)' }}
+            className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">
+            Same 4-week format, tuned to the rules and risks of your sector.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2.5 max-w-3xl mx-auto w-full">
+          {INDUSTRIES.map((s, i) => (
+            <div key={s.label} data-reveal="right" style={{ '--d': (i * 80) + 'ms' }}
+              className="svc-row rounded-2xl px-5 md:px-6 py-4 flex items-center gap-4 md:gap-6">
+              <span className="svc-ico w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                <Icon name={s.icon} style={{ width: 18, height: 18 }} />
+              </span>
+              <span className="w-28 md:w-44 shrink-0 text-[clamp(1.15rem,1.8vw,1.5rem)] leading-[1.15] tracking-[-.02em]">{s.label}</span>
+              <span className="svc-sub flex-1 text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">{s.apps}</span>
+              <Icon name="arrow" className="w-4 shrink-0 opacity-40" />
+            </div>
+          ))}
+        </div>
+
+        <div data-reveal className="flex justify-center">
+          <a href="index.html#work" className="link-arrow">
+            See AI case studies with metrics <Icon name="arrow" className="w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   GUARANTEES
+   ============================================================ */
+function Guarantees() {
+  return (
+    <section id="guarantees" className="relative w-full z-[1] py-14 md:py-20">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] flex flex-col gap-10 md:gap-12">
+        <h2 data-reveal="blur" className="uppercase text-center text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">
+          Zero risk. In writing.
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto w-full">
+          <div data-reveal="scale"
+            className="group rounded-2xl p-7 md:p-8 flex flex-col gap-5 transition-transform duration-500 hover:-translate-y-1.5"
+            style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
+            <span className="w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-500 group-hover:rotate-[-12deg]"
+              style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+              <Icon name="storm" className="w-6" />
+            </span>
+            <h3 className="uppercase text-[clamp(1.15rem,1.8vw,1.5rem)] leading-[1.15] font-normal">Storm Guarantee</h3>
+            <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">POC shows no value? <b>100% refund.</b></p>
+          </div>
+
+          <div data-reveal="scale"
+            style={{ '--d': '100ms', background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent) 100%)', color: 'var(--accent-ink)' }}
+            className="grad-anim group rounded-2xl p-7 md:p-8 flex flex-col gap-5 transition-transform duration-500 hover:-translate-y-1.5">
+            <span className="w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-500 group-hover:rotate-[18deg]"
+              style={{ background: 'var(--accent-ink)', color: 'var(--accent)' }}>
+              <Icon name="hurricane" className="w-6" />
+            </span>
+            <h3 className="uppercase text-[clamp(1.15rem,1.8vw,1.5rem)] leading-[1.15] font-normal">Hurricane Warranty</h3>
+            <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">Late delivery? <b>100% refund.</b> Deadlines are sacred.</p>
+          </div>
+
+          <div data-reveal="scale" style={{ '--d': '200ms', background: 'var(--card)', border: '1.5px solid var(--accent)' }}
+            className="group rounded-2xl p-7 md:p-8 flex flex-col gap-5 transition-transform duration-500 hover:-translate-y-1.5">
+            <span className="w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110"
+              style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+              <Icon name="heart" className="w-6" />
+            </span>
+            <h3 className="uppercase text-[clamp(1.15rem,1.8vw,1.5rem)] leading-[1.15] font-normal">Honesty Guarantee</h3>
+            <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">If AI doesn&rsquo;t make sense for your business, we&rsquo;ll tell you. <b>Free.</b></p>
+          </div>
+        </div>
+
+        <p data-reveal className="text-center text-[clamp(.78rem,.9vw,.88rem)] leading-[1.5]" style={{ color: 'var(--muted)' }}>
+          All three backed by written contract.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+const FAQS = [
+  { q: 'Do I need a lot of data?', a: 'Less than you think. Modern models work with modest datasets, and Week 1 starts by auditing what you already have \u2014 tickets, documents, CRM records, logs. If your data isn\u2019t ready, we\u2019ll tell you exactly what\u2019s missing and whether it\u2019s worth fixing before you spend anything on a POC.' },
+  { q: 'Can I see results in 4 weeks?', a: 'Yes \u2014 that\u2019s the point of the format. By the end of Week 4 you\u2019ll have working AI running on your data, doing the actual task: answering real queries, processing real documents, making real predictions. Not a demo video. Your data, working.' },
+  { q: 'What if AI makes mistakes or hallucinates?', a: 'It can \u2014 which is why we engineer for it. Every POC ships with guardrails: confidence thresholds, human-in-the-loop checkpoints, answers grounded in your own data with sources, and full audit logs. AI that can\u2019t be trusted with your customers never reaches them.' },
+  { q: 'Will AI replace my employees?', a: 'Our projects mostly kill the work nobody wants \u2014 the copy-paste, the triage, the repetitive formatting. Every engagement includes a role-impact analysis, and where AI changes a job, we help redesign it around higher-value work. Companies that deploy AI with their people outperform those that deploy against them.' },
+  { q: 'What technologies do you use?', a: 'Whatever the use case actually demands: OpenAI, Anthropic or open-source models, Python and modern ML tooling, integrated into your existing stack through clean APIs. We\u2019re vendor-neutral \u2014 zero partnerships, zero commissions \u2014 so the stack is chosen by your ROI, not our referral fees.' }
+];
+
+function FAQ() {
+  const [open, setOpen] = useState(null);
+  return (
+    <section id="faq" className="relative w-full z-[1] py-14 md:py-20">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] flex flex-col gap-8 md:gap-12">
+        <h2 data-reveal="blur" className="uppercase text-center text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">
+          Questions? Answered.
+        </h2>
+
+        <div className="flex flex-col gap-3 max-w-3xl mx-auto w-full">
+          {FAQS.map((f, i) => {
+            const isOpen = open === i;
+            return (
+              <div key={i} data-reveal
+                style={{
+                  '--d': (i * 60) + 'ms',
+                  background: 'var(--card)',
+                  border: '1px solid ' + (isOpen ? 'var(--accent)' : 'var(--border)'),
+                  transition: 'border-color .35s ease'
+                }}
+                className="rounded-2xl overflow-hidden">
+                <button onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen}
+                  className="w-full flex items-center justify-between gap-4 text-left p-5 md:p-6">
+                  <p className="max-w-[52ch] text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">{f.q}</p>
+                  <span className="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
+                    style={{
+                      background: isOpen ? 'var(--accent)' : 'var(--fg)',
+                      color: isOpen ? 'var(--accent-ink)' : 'var(--bg)',
+                      transform: isOpen ? 'rotate(135deg)' : 'rotate(0)'
+                    }}>
+                    <span className="absolute w-px h-2.5" style={{ background: 'currentColor' }} />
+                    <span className="absolute w-2.5 h-px" style={{ background: 'currentColor' }} />
+                  </span>
+                </button>
+                <div className="grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
+                  style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}>
+                  <div className="overflow-hidden">
+                    <div className="px-5 md:px-6 pb-5 md:pb-6">
+                      <div className="border rounded-xl p-5 md:p-6 text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]"
+                        style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
+                        {f.a}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   FINAL CTA
+   ============================================================ */
+const LEARN_POINTS = [
+  'Where AI makes sense for you',
+  'Where it doesn\u2019t (honesty)',
+  'What a POC would look like',
+  'Fixed price, timeline'
+];
+
+function FinalCTA() {
+  const [sent, setSent] = useState(false);
+
+  return (
+    <section id="contact" className="relative w-full z-[1] py-14 md:py-20">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px]">
+        <div data-reveal="scale"
+          className="relative overflow-hidden rounded-3xl px-6 py-14 md:px-16 md:py-20 flex flex-col items-center text-center gap-8"
+          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div aria-hidden className="absolute -z-10 top-0 left-1/2 -translate-x-1/2 w-[70vw] aspect-square rounded-full blur-3xl opacity-40"
+            style={{ background: 'radial-gradient(circle, var(--accent) 20%, transparent 70%)' }} />
+
+          <div className="flex flex-col items-center gap-3">
+            <h2 className="uppercase text-[clamp(2rem,6vw,5.5rem)] leading-none tracking-[-.05em] font-normal">Start with a conversation</h2>
+            <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]" style={{ color: 'var(--muted)' }}>2 hours. Free. No obligation.</p>
+          </div>
+
+          <div className="flex flex-col gap-3 max-w-md">
+            <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]" style={{ color: 'var(--muted)' }}>
+              In one conversation, you&rsquo;ll learn:
+            </p>
+            <ul className="flex flex-col gap-2.5 items-start">
+              {LEARN_POINTS.map((p) => (
+                <li key={p} className="flex items-center gap-3 text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+                    <Icon name="check" className="w-3.5" />
+                  </span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {sent ? (
+            <div className="fade-in flex flex-col items-center gap-3">
+              <span className="pop w-14 h-14 rounded-full flex items-center justify-center"
+                style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+                <Icon name="check" className="w-7" />
+              </span>
+              <p className="text-[clamp(1.15rem,1.8vw,1.5rem)] leading-[1.15]">Request received.</p>
+              <p className="text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]" style={{ color: 'var(--muted)' }}>
+                We&rsquo;ll reach out within 24 hours to schedule your free AI assessment.
+              </p>
+            </div>
+          ) : (
+            <form className="w-full max-w-xl flex flex-col sm:flex-row gap-3"
+              onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
+              <input required type="email" placeholder="Work email" aria-label="Work email" className="field flex-1" />
+              <input required type="tel" placeholder="Phone number" aria-label="Phone number" className="field flex-1" />
+              <Magnetic type="submit" className="btn-primary w-full sm:w-auto">
+                Book Free AI Assessment
+                <span className="btn-icon"><Icon name="arrow" className="w-4" /></span>
+              </Magnetic>
+            </form>
+          )}
+
+          <p className="text-[clamp(.78rem,.9vw,.88rem)] leading-[1.5]" style={{ color: 'var(--muted)' }}>
+            No obligation. No sales pitch. Answer within 24 hours.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+const FOOTER_SERVICES = [
+  { label: 'Custom Software',  href: 'custom-software.html' },
+  { label: 'Tech Consulting',  href: 'tech-consulting.html' },
+  { label: 'AI Integration',   href: '#', current: true },
+  { label: 'Architecture & Modernization', href: '#' },
+  { label: 'Web & eCommerce',  href: '#' },
+  { label: 'Marketing & SEO',  href: '#' },
+  { label: 'Strategic Consulting', href: '#' }
+];
+
+function Footer() {
+  return (
+    <footer className="relative bg-black text-white z-[1] overflow-hidden">
+      <div aria-hidden className="absolute -top-32 left-1/2 -translate-x-1/2 w-[80vw] aspect-square rounded-full blur-3xl opacity-15 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, var(--accent) 20%, transparent 70%)' }} />
+
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-7 lg:px-[46px] py-12 md:py-16 flex flex-col gap-10 relative">
+        <div className="flex flex-col lg:flex-row justify-between gap-10">
+          <div className="flex flex-col gap-3 max-w-xs">
+            <a href="index.html" className="flex items-center gap-2.5 text-[14px]">
+              <BrandMark variant="footer" />
+            </a>
+            <p className="text-[clamp(.78rem,.9vw,.88rem)] leading-[1.5] text-gray-400">
+              AI that pays for itself. 4-week POCs on your own data &mdash; with guardrails, monitoring, and the Honesty Guarantee in writing.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h4 className="uppercase text-gray-400 text-sm tracking-tight">Services</h4>
+            <div className="flex flex-col gap-1.5 text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">
+              {FOOTER_SERVICES.map((s) => (
+                <a key={s.label} href={s.href}
+                  className="group inline-flex items-center gap-2 hover:text-white transition-colors">
+                  <span className={'transition-transform duration-300 group-hover:translate-x-1 ' + (s.current ? 'text-white' : '')}>
+                    {s.label}{s.current ? ' ·' : ''}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h4 className="uppercase text-gray-400 text-sm tracking-tight">Contact</h4>
+            <div className="flex flex-col gap-1.5 text-[clamp(.92rem,1.05vw,1.05rem)] leading-[1.55]">
+              <a href="tel:+34660014818" className="group inline-flex items-center gap-2 hover:text-white transition-colors">
+                <span className="transition-transform duration-300 group-hover:translate-x-1">+34 660 014 818</span>
+              </a>
+              <a href="mailto:hello@example.com" className="group inline-flex items-center gap-2 hover:text-white transition-colors">
+                <span className="transition-transform duration-300 group-hover:translate-x-1">hello@example.com</span>
+              </a>
+              <a href="https://wa.me/34660014818" className="group inline-flex items-center gap-2 hover:text-white transition-colors">
+                <span className="transition-transform duration-300 group-hover:translate-x-1">WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between gap-4 text-[clamp(.78rem,.9vw,.88rem)] leading-[1.5] text-gray-400">
+          <p>© {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.</p>
+          <a href="#" className="hover:text-white transition-colors">Privacy policy</a>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ============================================================
+   APP
+   ============================================================ */
+function App() {
+  const [theme, setTheme] = useState(function () {
+    try { return localStorage.getItem('tcg-theme') || 'light'; }
+    catch (e) { return 'light'; }
+  });
+
+  useSectionTabMemory();
+  useReveal();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    var boot = document.getElementById('boot');
+    if (boot) boot.classList.add('hide');
+  }, []);
+
+  return (
+    <div className="min-h-[100svh]" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
+      <ScrollProgress />
+      <Atmosphere />
+      <CustomCursor />
+      <Nav theme={theme} setTheme={setTheme} />
+      <main className="flex flex-col">
+        <Hero theme={theme} />
+        <RealityCheck />
+        <UseCases />
+        <Comparison />
+        <Process />
+        <Industries />
+        <Guarantees />
+        <FAQ />
+        <FinalCTA />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+} catch (err) {
+  var el = document.getElementById('err');
+  el.style.display = 'block';
+  el.textContent = 'Boot error:\n\n' + (err && err.stack || err);
+}
+</script>
+</body>
+</html>

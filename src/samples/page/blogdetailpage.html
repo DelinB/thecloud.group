@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The 88% uses AI — TCG</title>
+
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"></script>
+
+<style>
+@font-face {
+  font-display: swap;
+  font-family: 'codec-pro';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F73ed8859cfe61a80695ca501ed94529112bbb4e4.woff2?generation=1790060408823232&alt=media') format('woff2');
+}
+
+:root {
+  --bg: rgb(246 246 246);
+  --fg: #000000;
+  --muted: #5c5c5c;
+  --card: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --accent: rgb(225 252 6);
+}
+.dark {
+  --bg: #0a0a0a;
+  --fg: #f5f5f5;
+  --muted: #a3a3a3;
+  --card: #161616;
+  --border: rgba(255, 255, 255, 0.10);
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'codec-pro', system-ui, -apple-system, sans-serif;
+  transition: background-color .35s ease, color .35s ease;
+  -webkit-font-smoothing: antialiased;
+}
+#root { min-height: 100%; }
+section[id] { scroll-margin-top: 96px; }
+
+::selection { background: var(--accent); color: #000; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(128,128,128,.25); border-radius: 9999px; }
+
+.t-hero  { font-size: clamp(2rem, 6vw, 4.6rem); line-height: .98; letter-spacing: -.045em; font-weight: 400; }
+.t-h2    { font-size: clamp(2rem, 6vw, 5.5rem); line-height: 1; letter-spacing: -.05em; font-weight: 400; }
+.t-h2-sm { font-size: clamp(1.75rem, 4.2vw, 3.7rem); line-height: 1.02; letter-spacing: -.04em; font-weight: 400; }
+.t-h3    { font-size: clamp(1.15rem, 1.8vw, 1.5rem); line-height: 1.1; letter-spacing: -.02em; font-weight: 400; }
+.t-stat  { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1; letter-spacing: -.05em; font-weight: 400; }
+.t-body  { font-size: clamp(.92rem, 1.05vw, 1.05rem); line-height: 1.55; }
+.t-small { font-size: clamp(.78rem, .9vw, .88rem); line-height: 1.5; }
+.t-chip  { font-size: clamp(.75rem, .85vw, .86rem); line-height: 1.4; }
+
+.container-x { width: 100%; max-width: 1280px; margin-inline: auto; padding-inline: 20px; }
+@media (min-width: 640px)  { .container-x { padding-inline: 28px; } }
+@media (min-width: 1024px) { .container-x { padding-inline: 46px; } }
+
+/* ---------- REVEAL + WIPE ---------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);
+  transition-delay: var(--d, 0ms);
+}
+[data-reveal].on { opacity: 1; transform: none; }
+.hl-wipe {
+  background: var(--accent); color: #000;
+  padding: .02em .14em;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .9s cubic-bezier(.22,1,.36,1) .45s;
+}
+[data-reveal].on .hl-wipe { clip-path: inset(0 -0.1em 0 0); }
+
+/* ---------- NAV ---------- */
+.nav-link { position: relative; }
+.nav-link::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -5px; height: 1.5px;
+  background: var(--fg); transform: scaleX(0); transform-origin: left; transition: transform .25s ease;
+}
+.nav-link:hover::after { transform: scaleX(1); }
+
+.chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 32px; padding: 0 14px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  background: var(--card);
+  color: var(--fg);
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 18px;
+  height: 52px; padding: 4px 6px 4px 24px;
+  border-radius: 9999px;
+  background: var(--fg); color: var(--bg);
+  font-size: .92rem; line-height: 1.4;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.btn-primary:hover { transform: translateY(-1px); opacity: .92; }
+.btn-primary .btn-icon {
+  width: 40px; height: 40px; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: #000;
+}
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 52px; padding: 0 26px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--card); color: var(--fg);
+  font-size: .92rem; line-height: 1.4;
+  transition: border-color .18s ease, transform .18s ease;
+}
+.btn-ghost:hover { border-color: var(--fg); transform: translateY(-1px); }
+
+.link-arrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .95rem;
+  border-bottom: 1px solid var(--fg);
+  padding-bottom: 2px;
+  transition: gap .2s ease, opacity .2s ease;
+}
+.link-arrow:hover { gap: 14px; opacity: .75; }
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.fade-in { animation: fadeUp .5s ease both; }
+@keyframes pop { 0% { transform: scale(.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.pop { animation: pop .3s cubic-bezier(.22,1,.36,1) both; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------- ARTICLE PROSE ---------- */
+/* NOTE: paragraphs scoped to direct children so nested <p> (stat labels, takeaways
+   heading) keep their own classes instead of being overridden by prose sizing */
+.prose { max-width: 68ch; }
+.prose > p {
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  line-height: 1.75;
+  margin: 0 0 1.4em;
+}
+.prose > p.dropcap::first-letter {
+  float: left;
+  font-size: 3.2em;
+  line-height: .82;
+  padding: .06em .14em 0 0;
+}
+.prose a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.prose strong { font-weight: 600; }
+
+.a-h2 {
+  display: flex; align-items: baseline; gap: 14px;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  letter-spacing: -.03em; line-height: 1.1;
+  margin: 2.4em 0 .8em;
+}
+.a-h2 .n { font-size: .55em; color: var(--muted); letter-spacing: 0; }
+
+.prose ul { list-style: none; padding: 0; margin: 0 0 1.4em; display: flex; flex-direction: column; gap: 12px; }
+.prose ul li { position: relative; padding-left: 28px; font-size: clamp(1rem, 1.15vw, 1.15rem); line-height: 1.7; }
+.prose ul li::before {
+  content: ''; position: absolute; left: 0; top: .55em;
+  width: 10px; height: 10px; border-radius: 9999px; background: var(--accent);
+}
+
+.prose ol { list-style: none; counter-reset: q; padding: 0; margin: 0 0 1.4em; display: flex; flex-direction: column; gap: 16px; }
+.prose ol li { counter-increment: q; position: relative; padding-left: 56px; font-size: clamp(1rem, 1.15vw, 1.15rem); line-height: 1.7; }
+.prose ol li::before {
+  content: counter(q, decimal-leading-zero);
+  position: absolute; left: 0; top: .18em;
+  width: 38px; height: 38px; border-radius: 9999px;
+  background: var(--accent); color: #000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem;
+}
+
+.pullquote { border-left: 3px solid var(--accent); padding: 8px 0 8px 26px; margin: 2.2em 0; }
+.pullquote p {
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  line-height: 1.3; letter-spacing: -.02em; margin: 0;
+}
+
+.prose .footnote {
+  font-size: .8rem; color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 12px; margin-top: 2.5em;
+}
+
+/* ---------- CODE BLOCK ---------- */
+.codeblock { background: #0d0d0d; color: #e8e8e8; border-radius: 16px; overflow: hidden; margin: 2em 0; }
+.codeblock .cb-bar {
+  height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.codeblock .cb-dot { width: 10px; height: 10px; border-radius: 9999px; }
+.codeblock .cb-file {
+  margin-left: 10px; font-family: ui-monospace, Menlo, monospace;
+  font-size: .72rem; color: #8a8a8a;
+}
+.codeblock pre {
+  margin: 0; padding: 20px 24px; overflow-x: auto;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: .82rem; line-height: 1.75;
+}
+.tok-k { color: rgb(225 252 6); }
+.tok-s { color: #7ee787; }
+.tok-c { color: #6e6e6e; font-style: italic; }
+.tok-f { color: #79c0ff; }
+
+/* ---------- TABLE ---------- */
+.prose table { width: 100%; border-collapse: collapse; margin: 2em 0; font-size: .95rem; }
+.prose th { text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--fg); }
+.prose td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.prose td:first-child { color: var(--muted); }
+.prose td:last-child { font-weight: 500; }
+
+/* ---------- TAKEAWAYS + STATS ---------- */
+.takeaways {
+  background: var(--card);
+  border: 1.5px solid var(--accent);
+  border-radius: 20px;
+  padding: 26px 30px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.stat-callout {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 24px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+/* ---------- TOC ---------- */
+.toc-link {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 7px 0 7px 14px;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+  font-size: .88rem; line-height: 1.35;
+  transition: color .25s ease, border-color .25s ease;
+}
+.toc-link:hover { color: var(--fg); }
+.toc-link.active { border-color: var(--accent); color: var(--fg); }
+.toc-link .n { font-size: .72em; opacity: .6; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .hl-wipe { clip-path: none !important; }
+  .fade-in, .pop { animation: none !important; }
+}
+
+/* ---------- BOOT / ERROR ---------- */
+#boot {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); color: var(--fg); z-index: 999999;
+  font-family: 'codec-pro', system-ui, sans-serif;
+  transition: opacity .4s ease;
+}
+#boot.hide { opacity: 0; pointer-events: none; }
+#boot .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display:inline-block; margin: 0 4px; animation: pulse 1.2s infinite; }
+#boot .dot:nth-child(2){ animation-delay: .15s; }
+#boot .dot:nth-child(3){ animation-delay: .3s; }
+@keyframes pulse { 0%,100%{ transform: scale(.6); opacity:.4;} 50%{ transform: scale(1); opacity:1;} }
+#err {
+  position: fixed; inset: 0; z-index: 9999999;
+  background: #1a0000; color: #ff9e9e;
+  padding: 24px; overflow: auto;
+  font-family: ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.6;
+  white-space: pre-wrap; display: none;
+}
+</style>
+</head>
+
+<body>
+<div id="boot"><div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+<div id="root"></div>
+<pre id="err"></pre>
+
+<script>
+window.addEventListener('error', function (e) {
+  var el = document.getElementById('err');
+  el.style.display = 'block';
+  el.textContent = 'Runtime error:\n\n' + (e.error && e.error.stack || e.message) +
+    (e.filename ? '\n\nAt: ' + e.filename + ':' + e.lineno : '');
+});
+</script>
+
+<script type="text/babel" data-presets="react" data-type="module">
+const { useState, useEffect, useRef } = React;
+const Fragment = React.Fragment;
+
+/* ---------- ICONS ---------- */
+const ICONS = {
+  arrow:    <path d="M5 12h14M13 6l6 6-6 6" />,
+  arrowL:   <path d="M19 12H5M11 6l-6 6 6 6" />,
+  check:    <path d="M20 6L9 17l-5-5" />,
+  mail:     <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zM22 6l-10 7L2 6" />,
+  spark:    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z" />,
+  compass:  <path d="M12 22a10 10 0 100-20 10 10 0 000 20zM16.2 7.8l-2.1 6.3-6.3 2.1 2.1-6.3 6.3-2.1z" />,
+  pen:      <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />,
+  clock:    <path d="M12 22a10 10 0 100-20 10 10 0 000 20zM12 6v6l4 2" />,
+  link:     <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />,
+  message:  <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />,
+  xsoc:     <path d="M4 4l7.9 9.9L4.4 20h2.4l6.1-5.4 4.2 5.4H20l-8.1-10.1L19.3 4H17l-5.6 5L7.6 4H4z" fill="currentColor" stroke="none" />,
+  linkedin: <Fragment>
+    <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z" />
+    <rect x="2" y="9" width="4" height="12" />
+    <circle cx="4" cy="4" r="2" />
+  </Fragment>
+};
+function Icon({ name, className, style }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      {ICONS[name]}
+    </svg>
+  );
+}
+
+/* ---------- ARTICLE DATA ---------- */
+/* TODO: article content is drafted in brand voice — replace with the real post,
+   and swap SHARE_URL for the production URL */
+const SHARE_URL = 'https://www.tcg.example/insights/88-percent-ai-value';
+
+const ARTICLE = {
+  category: 'Data & AI',
+  catColor: '#22c55e',
+  title: 'The 88% uses AI. That doesn\u2019t mean the 88% is creating value.',
+  standfirst: 'Everyone bought licenses. Almost nobody can point to the P&L line that moved. After auditing 40+ AI deployments, here\u2019s the pattern behind the ones that pay back.',
+  author: 'Elena M\u00E1rquez',
+  authorRole: 'Head of Data & AI',
+  authorInitials: 'EM',
+  date: 'September 23, 2026',
+  read: 8,
+  tags: ['AI Strategy', 'ROI', 'Benchmarks', 'POC']
+};
+
+const TOC = [
+  { id: 's1',        n: '01', title: 'The number everyone quotes' },
+  { id: 's2',        n: '02', title: 'Activity is not value' },
+  { id: 's3',        n: '03', title: 'Where the value actually is' },
+  { id: 's4',        n: '04', title: 'The four questions' },
+  { id: 's5',        n: '05', title: 'Monday morning' },
+  { id: 'takeaways', n: '06', title: 'Key takeaways' }
+];
+const TOC_IDS = TOC.map((t) => t.id);
+
+const RELATED = [
+  { id: 'r1', category: 'Data & AI', color: '#22c55e', icon: 'spark',
+    title: 'Fine-tuning vs RAG: we ran both on the same data',
+    excerpt: 'Same corpus, same evaluation set, two very different invoices. When each approach wins \u2014 with the benchmarks to back it.',
+    author: 'Elena M\u00E1rquez', date: 'Aug 5, 2026', read: 12 },
+  { id: 'r2', category: 'Technology Consulting', color: 'rgb(225,252,6)', icon: 'compass',
+    title: 'The POC trap: how 4 weeks beats 6 months',
+    excerpt: 'Long discovery phases feel rigorous and produce decks. Short POCs feel risky and produce working software. We ran the numbers on 90+ projects.',
+    author: 'Marc Vidal', date: 'Aug 18, 2026', read: 5 },
+  { id: 'r3', category: 'Founder Notes', color: '#f97316', icon: 'pen',
+    title: 'What 2,000 projects taught us about estimating software',
+    excerpt: 'Every estimate is wrong. The good ones are wrong in a known direction, by a known amount. Our internal method, minus the survivorship bias.',
+    author: 'Marc Vidal', date: 'Jul 3, 2026', read: 11 }
+];
+
+const PREV = {
+  title: 'We audited a SaaS that spent \u20AC400k on features nobody used',
+  date: 'Sep 10, 2026'
+};
+
+/* ---------- HOOKS ---------- */
+const SECTIONS = [
+  { id: 'article-top', title: 'The 88% Problem' },
+  { id: 's1', title: 'The Number Everyone Quotes' },
+  { id: 's2', title: 'Activity Is Not Value' },
+  { id: 's3', title: 'Where Value Lives' },
+  { id: 's4', title: 'The Four Questions' },
+  { id: 's5', title: 'Monday Morning' },
+  { id: 'takeaways', title: 'Key Takeaways' },
+  { id: 'author', title: 'Author' },
+  { id: 'related', title: 'Related Articles' },
+  { id: 'subscribe', title: 'Newsletter' }
+];
+function useSectionTabMemory() {
+  useEffect(() => {
+    const tracked = SECTIONS
+      .map((s) => ({ ...s, el: document.getElementById(s.id) }))
+      .filter((s) => s.el);
+    const io = new IntersectionObserver((entries) => {
+      const best = entries.filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!best) return;
+      const sec = tracked.find((s) => s.el === best.target);
+      if (sec) document.title = sec.title + ' — TCG';
+    }, { rootMargin: '-25% 0px -55% 0px', threshold: [0, 0.25, 0.5, 1] });
+    tracked.forEach((s) => io.observe(s.el));
+    return () => io.disconnect();
+  }, []);
+}
+
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-reveal]');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+function useCountUp(target, duration) {
+  const [val, setVal] = useState(0);
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVal(target);
+      return;
+    }
+    let raf;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        const t0 = performance.now();
+        const tick = (t) => {
+          const p = Math.min((t - t0) / duration, 1);
+          setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
+          if (p < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.35 });
+    io.observe(el);
+    return () => { io.disconnect(); if (raf) cancelAnimationFrame(raf); };
+  }, [target, duration]);
+  return [ref, val];
+}
+
+function useScrollSpy(ids) {
+  const [active, setActive] = useState(ids[0]);
+  useEffect(() => {
+    const els = ids.map((id) => document.getElementById(id)).filter(Boolean);
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [ids]);
+  return active;
+}
+
+function useArticleProgress(ref) {
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    const on = () => {
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      if (total <= 0) { setPct(100); return; }
+      const scrolled = Math.min(Math.max(-rect.top, 0), total);
+      setPct(Math.round((scrolled / total) * 100));
+    };
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    window.addEventListener('resize', on);
+    return () => {
+      window.removeEventListener('scroll', on);
+      window.removeEventListener('resize', on);
+    };
+  }, [ref]);
+  return pct;
+}
+
+/* ---------- SCROLL PROGRESS BAR ---------- */
+function ScrollProgress() {
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    const on = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      setP(max > 0 ? h.scrollTop / max : 0);
+    };
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+  return (
+    <div aria-hidden className="fixed top-0 left-0 right-0 h-[3px] z-[95] origin-left pointer-events-none"
+      style={{ background: 'var(--accent)', transform: 'scaleX(' + p + ')' }} />
+  );
+}
+
+/* ---------- NAV ---------- */
+// NOTE: "Insights" points at the blog listing page — rename to match your file
+const NAV_LINKS = [
+  { label: 'Insights',         href: 'insights.html' },
+  { label: 'Related articles', href: '#related' },
+  { label: 'Newsletter',       href: '#subscribe' }
+];
+
+function Nav({ theme, setTheme }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  return (
+    <Fragment>
+      <header className={'fixed top-0 inset-x-0 z-[90] transition-colors duration-300 ' +
+        (scrolled ? 'backdrop-blur-md bg-black/5 border-b border-[color:var(--border)]' : '')}>
+        <div className="container-x flex items-center justify-between h-[60px] md:h-[72px]">
+          <div className="flex items-center gap-5">
+            <a href="index.html" className="flex items-center gap-2.5 text-[13px] md:text-[14px]">
+              <span className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[13px]"
+                style={{ background: 'var(--fg)', color: 'var(--bg)' }}>T</span>
+              <span>TCG</span>
+            </a>
+            <span className="hidden sm:inline t-chip px-3 py-1 rounded-full" style={{ background: 'var(--accent)', color: '#000' }}>
+              Insights
+            </span>
+          </div>
+
+          <ul className="hidden lg:flex items-center gap-6 text-[13px] md:text-[14px]">
+            {NAV_LINKS.map((l) => (
+              <li key={l.label}>
+                <a href={l.href} className="nav-link inline-flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative flex items-center h-9 sm:h-10 rounded-full p-1" style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
+              <button onClick={() => setTheme('light')} aria-label="Light mode"
+                className="relative z-10 px-3 sm:px-4 h-full text-[12px] sm:text-[13px] rounded-full"
+                style={{ color: theme === 'light' ? 'var(--fg)' : 'rgba(0,0,0,.55)' }}
+              >Light</button>
+              <button onClick={() => setTheme('dark')} aria-label="Dark mode"
+                className="relative z-10 px-3 sm:px-4 h-full text-[12px] sm:text-[13px] rounded-full"
+                style={{ color: theme === 'dark' ? 'var(--fg)' : 'rgba(255,255,255,.6)' }}
+              >Dark</button>
+              <span className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out"
+                style={{ background: 'var(--bg)', left: theme === 'light' ? '4px' : 'calc(50% + 0px)' }} />
+            </div>
+
+            <a href="index.html#contact" className="hidden sm:inline-flex items-center gap-3 h-10 md:h-11 pl-4 md:pl-5 pr-1 rounded-full text-[13px] md:text-[14px]"
+              style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
+              Free consultation
+              <span className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-black" style={{ background: 'var(--accent)' }}>
+                <Icon name="arrow" className="w-3.5" />
+              </span>
+            </a>
+
+            <button onClick={() => setOpen(!open)} aria-label="Menu"
+              className="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-full border"
+              style={{ borderColor: 'var(--border)' }}>
+              <span className={'block w-4 h-[1.5px] transition-transform ' + (open ? 'translate-y-[6px] rotate-45' : '')} style={{ background: 'currentColor' }} />
+              <span className={'block w-4 h-[1.5px] transition-opacity ' + (open ? 'opacity-0' : '')} style={{ background: 'currentColor' }} />
+              <span className={'block w-4 h-[1.5px] transition-transform ' + (open ? '-translate-y-[6px] -rotate-45' : '')} style={{ background: 'currentColor' }} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className={'fixed inset-0 z-[89] lg:hidden transition-opacity duration-300 ' + (open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')}>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
+        <nav className={'absolute top-[60px] inset-x-0 border-b p-6 pt-4 transition-transform duration-300 ' + (open ? 'translate-y-0' : '-translate-y-4')}
+          style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}>
+          <ul className="flex flex-col gap-1">
+            {NAV_LINKS.map((l) => (
+              <li key={l.label}>
+                <a href={l.href} onClick={() => setOpen(false)} className="block py-3 text-2xl border-b" style={{ borderColor: 'var(--border)' }}>{l.label}</a>
+              </li>
+            ))}
+          </ul>
+          <a href="index.html#contact" onClick={() => setOpen(false)} className="mt-6 flex items-center justify-between h-12 pl-5 pr-1 rounded-full"
+            style={{ background: 'var(--fg)', color: 'var(--bg)' }}>
+            Free consultation
+            <span className="w-10 h-10 rounded-full flex items-center justify-center text-black" style={{ background: 'var(--accent)' }}>
+              <Icon name="arrow" className="w-4" />
+            </span>
+          </a>
+        </nav>
+      </div>
+    </Fragment>
+  );
+}
+
+/* ---------- SHARE ROW ---------- */
+function ShareRow() {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(SHARE_URL);
+    } catch (e) {
+      var ta = document.createElement('textarea');
+      ta.value = SHARE_URL;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e2) {}
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    setTimeout(function () { setCopied(false); }, 1800);
+  };
+
+  const btn = 'w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-75';
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="t-chip uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Share</span>
+      <button type="button" onClick={copy} aria-label="Copy link" className={btn}
+        style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
+        <Icon name={copied ? 'check' : 'link'} className="w-4" style={copied ? { color: '#22c55e' } : undefined} />
+      </button>
+      <a href={'https://twitter.com/intent/tweet?text=' + encodeURIComponent(ARTICLE.title) + '&url=' + encodeURIComponent(SHARE_URL)}
+        target="_blank" rel="noreferrer" aria-label="Share on X" className={btn}
+        style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
+        <Icon name="xsoc" className="w-4" />
+      </a>
+      <a href={'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(SHARE_URL)}
+        target="_blank" rel="noreferrer" aria-label="Share on LinkedIn" className={btn}
+        style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
+        <Icon name="linkedin" className="w-4" />
+      </a>
+      <a href={'https://wa.me/?text=' + encodeURIComponent(ARTICLE.title + ' ' + SHARE_URL)}
+        target="_blank" rel="noreferrer" aria-label="Share on WhatsApp" className={btn}
+        style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
+        <Icon name="message" className="w-4" />
+      </a>
+      {copied && <span className="fade-in t-chip" style={{ color: '#22c55e' }}>Copied</span>}
+    </div>
+  );
+}
+
+/* ---------- ARTICLE HERO ---------- */
+function ArticleHero() {
+  return (
+    <section id="article-top" className="relative w-full pt-32 pb-10 md:pt-40 md:pb-12 overflow-hidden">
+      <div aria-hidden className="absolute -z-10 top-0 right-0 w-[60vw] md:w-[40vw] aspect-square rounded-full blur-3xl opacity-40"
+        style={{ background: 'radial-gradient(circle, rgb(225,252,6) 20%, transparent 70%)' }} />
+
+      <div className="container-x flex flex-col gap-7">
+        <nav aria-label="Breadcrumb" data-reveal className="t-chip flex items-center gap-2 flex-wrap" style={{ color: 'var(--muted)' }}>
+          <a href="index.html" className="hover:opacity-70">Home</a>
+          <span>/</span>
+          <a href="insights.html" className="hover:opacity-70">Insights</a>
+          <span>/</span>
+          <span style={{ color: 'var(--fg)' }}>{ARTICLE.category}</span>
+        </nav>
+
+        <div data-reveal style={{ '--d': '80ms' }} className="flex flex-col gap-6 max-w-4xl">
+          <span className="inline-flex items-center gap-2 t-chip uppercase tracking-wide self-start" style={{ color: 'var(--muted)' }}>
+            <span className="w-2 h-2 rounded-full" style={{ background: ARTICLE.catColor }} />
+            {ARTICLE.category}
+          </span>
+          <h1 className="t-hero" style={{ lineHeight: 1.05 }}>{ARTICLE.title}</h1>
+          <p className="t-body max-w-2xl" style={{ color: 'var(--muted)' }}>{ARTICLE.standfirst}</p>
+        </div>
+
+        <div data-reveal style={{ '--d': '160ms' }} className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 pt-6 border-t">
+          <div className="flex items-center gap-3">
+            <span className="w-11 h-11 rounded-full flex items-center justify-center text-[13px] font-medium shrink-0"
+              style={{ background: 'var(--fg)', color: 'var(--bg)' }}>{ARTICLE.authorInitials}</span>
+            <span className="flex flex-col">
+              <span className="t-small">{ARTICLE.author}</span>
+              <span className="t-chip" style={{ color: 'var(--muted)' }}>{ARTICLE.authorRole}</span>
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-5">
+            <p className="t-chip flex items-center gap-2" style={{ color: 'var(--muted)' }}>
+              <Icon name="clock" className="w-3.5" /> {ARTICLE.read} min read · {ARTICLE.date}
+            </p>
+            <ShareRow />
+          </div>
+        </div>
+
+        <div data-reveal style={{ '--d': '220ms' }} className="lg:hidden -mx-5 px-5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 w-max py-1">
+            <span className="t-chip uppercase tracking-wide shrink-0" style={{ color: 'var(--muted)' }}>On this page:</span>
+            {TOC.map((t) => (
+              <a key={t.id} href={'#' + t.id} className="chip t-chip shrink-0" style={{ border: '1px solid var(--border)' }}>
+                {t.n} · {t.title}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- FEATURED VISUAL ---------- */
+function FeaturedVisual() {
+  const [ref, val] = useCountUp(88, 1400);
+  return (
+    <div className="container-x">
+      <div data-reveal className="relative overflow-hidden rounded-3xl min-h-[300px] md:min-h-[380px] p-8 md:p-14 flex flex-col md:flex-row md:items-end md:justify-between gap-8"
+        style={{ background: 'linear-gradient(150deg, #0a0a0a 0%, #0a0a0a 45%, rgb(225,252,6) 135%)', color: '#fff' }}>
+        <Icon name="spark" className="absolute -bottom-14 -right-14 w-72 h-72" style={{ opacity: .07 }} />
+
+        <div ref={ref} className="flex flex-col gap-3">
+          <div className="t-stat tabular-nums leading-none" style={{ fontSize: 'clamp(4.5rem, 13vw, 9rem)' }}>
+            {val}<span style={{ fontSize: '.38em' }}>%</span>
+          </div>
+          <p className="t-body" style={{ color: 'rgba(255,255,255,.75)' }}>of enterprises report using AI tools.</p>
+        </div>
+
+        <p className="t-small uppercase tracking-wide max-w-[24ch]" style={{ color: 'rgba(255,255,255,.55)' }}>
+          Data &amp; AI · From our audit data
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- TOC SIDEBAR ---------- */
+function TOCSidebar({ active, pct }) {
+  return (
+    <aside className="hidden lg:block">
+      <div className="sticky top-24 flex flex-col gap-5">
+        <p className="t-chip uppercase tracking-wide" style={{ color: 'var(--muted)' }}>On this page</p>
+        <nav className="flex flex-col">
+          {TOC.map((t) => (
+            <a key={t.id} href={'#' + t.id}
+              className={'toc-link' + (active === t.id ? ' active' : '')}>
+              <span className="n">{t.n}</span>
+              {t.title}
+            </a>
+          ))}
+        </nav>
+        <div className="flex flex-col gap-2 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center justify-between">
+            <span className="t-chip uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Read</span>
+            <span className="t-chip tabular-nums">{pct}%</span>
+          </div>
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+            <div className="h-full rounded-full transition-[width] duration-200"
+              style={{ width: pct + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ---------- PROSE COMPONENTS ---------- */
+function H2({ n, children }) {
+  return <h2 className="a-h2"><span className="n">{n}</span>{children}</h2>;
+}
+
+function PullQuote({ children }) {
+  return <blockquote className="pullquote"><p>{children}</p></blockquote>;
+}
+
+function StatRow({ stats }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-8">
+      {stats.map((s) => (
+        <div key={s.label} className="stat-callout">
+          <div className="t-stat" style={{ fontSize: 'clamp(1.9rem, 3.6vw, 2.8rem)' }}>{s.value}</div>
+          <p className="t-small" style={{ color: 'var(--muted)' }}>{s.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CodeBlock({ file, lines }) {
+  return (
+    <div className="codeblock">
+      <div className="cb-bar">
+        <span className="cb-dot" style={{ background: '#ff5f57' }} />
+        <span className="cb-dot" style={{ background: '#febc2e' }} />
+        <span className="cb-dot" style={{ background: '#28c840' }} />
+        <span className="cb-file">{file}</span>
+      </div>
+      <pre><code>{lines.map((l, i) => <Fragment key={i}>{l}{'\n'}</Fragment>)}</code></pre>
+    </div>
+  );
+}
+
+/* FIXED: every line is wrapped in a single outer <span> — valid JSX */
+const SQL_LINES = [
+  <span className="tok-c">-- What we ask instead of "do you use AI"</span>,
+  <span className="tok-k">SELECT</span>,
+  <span>{'  '}<span className="tok-f">COUNT</span>(*){'                    '}<span className="tok-k">AS</span> tickets,</span>,
+  <span>{'  '}<span className="tok-f">SUM</span>(cost_cents) / 100.0{'     '}<span className="tok-k">AS</span> support_cost_eur,</span>,
+  <span>{'  '}<span className="tok-f">AVG</span>(first_response_seconds){' '}<span className="tok-k">AS</span> response_time</span>,
+  <span><span className="tok-k">FROM</span> support_tickets</span>,
+  <span><span className="tok-k">WHERE</span> created_at {'>='} <span className="tok-f">NOW</span>() - <span className="tok-k">INTERVAL</span> <span className="tok-s">'90 days'</span></span>,
+  <span>{'  '}<span className="tok-k">AND</span> resolved_by <span className="tok-k">IN</span> (<span className="tok-s">'human'</span>, <span className="tok-s">'ai_assisted'</span>);</span>
+];
+
+function ValueTable() {
+  const rows = [
+    ['Daily active users', 'What did it save?', 'Cost per resolution'],
+    ['Model accuracy', 'What did it change?', 'Decisions changed per week'],
+    ['API calls', 'What did it return?', 'Hours given back to the team'],
+    ['AI mentions in the roadmap', 'What did it earn?', 'Margin impact, attributed']
+  ];
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Activity metric</th>
+          <th>The question a CFO asks</th>
+          <th>Value metric</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r[0]}>
+            <td>{r[0]}</td>
+            <td>{r[1]}</td>
+            <td>{r[2]}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/* ---------- ARTICLE BODY ---------- */
+function ArticleBody({ bodyRef }) {
+  return (
+    <article ref={bodyRef} className="max-w-none w-full">
+      <section id="s1" data-reveal className="prose mt-4">
+        <H2 n="01">The number everyone quotes</H2>
+        <p className="dropcap">
+          Somewhere in your last board meeting, someone quoted the adoption statistic: 88% of enterprises
+          now use AI. It&rsquo;s a real number, and it&rsquo;s genuinely impressive &mdash; <em>if you know what it measures.</em>
+        </p>
+        <p>
+          It measures usage. Licenses count. Pilots count. The chatbot three people opened in March counts.
+          The survey asks one question &mdash; <em>has your organization used an AI tool this year</em> &mdash; and
+          &ldquo;used&rdquo; is doing heroic work in that sentence.
+        </p>
+        <p>
+          Adoption is a measure of curiosity, and curiosity has never been cheaper. It got the budget
+          approved. It won&rsquo;t get it renewed.
+        </p>
+      </section>
+
+      <section id="s2" data-reveal className="prose">
+        <H2 n="02">Activity is not value</H2>
+        <p>
+          Open the typical AI dashboard. Daily active users. Prompts per week. Model accuracy trending up
+          and to the right. Every one of those is an <strong>activity metric</strong> &mdash; and not one of
+          them appears on an income statement.
+        </p>
+        <p>
+          A CFO cannot renew a line item measured in prompts. The uncomfortable version: if you can&rsquo;t
+          name the cost line that dropped or the revenue line that grew, your AI program is a cost center
+          with excellent PR.
+        </p>
+        <PullQuote>
+          Adoption was the easy part. Value is an engineering problem &mdash; and engineering problems have
+          engineering answers.
+        </PullQuote>
+      </section>
+
+      <section id="s3" data-reveal className="prose">
+        <H2 n="03">Where the value actually is</H2>
+        <p>
+          Across the deployments we&rsquo;ve audited, AI reliably pays back in exactly three places:
+        </p>
+        <ul>
+          <li><strong>Cost</strong> &mdash; the unit economics of a repeatable process: cost per resolved ticket, per processed document, per screened CV.</li>
+          <li><strong>Revenue</strong> &mdash; conversion lift anywhere AI touches the funnel: recommendations, pricing, lead scoring.</li>
+          <li><strong>Risk</strong> &mdash; avoided cost with a defensible estimate: fraud caught, churn prevented, downtime predicted.</li>
+        </ul>
+        <p>
+          The rule of thumb we use in audits: if the metric doesn&rsquo;t have a currency sign &mdash; or a proxy
+          you&rsquo;d defend to a CFO &mdash; it&rsquo;s a hobby metric, not a value metric.
+        </p>
+        <StatRow stats={[
+          { value: '\u221262%', label: 'median cost-per-ticket reduction across our AI support audits' },
+          { value: '+340%',    label: 'conversion lift \u2014 Cultural Fit, HR SaaS' },
+          { value: '\u20AC2.4M', label: 'annual savings \u2014 SISCOVA digitization' }
+        ]} />
+      </section>
+
+      <section id="s4" data-reveal className="prose">
+        <H2 n="04">The four questions</H2>
+        <p>
+          When we audit an AI deployment, four questions do most of the work. They&rsquo;re also the four
+          questions worth asking <em>before</em> a euro is spent:
+        </p>
+        <ol>
+          <li><strong>What decision or process does this change &mdash; specifically?</strong> &ldquo;Make us smarter&rdquo; is not a process.</li>
+          <li><strong>What does it cost fully loaded?</strong> Licenses are the small number. Integration, monitoring and the human review layer are the big ones.</li>
+          <li><strong>What&rsquo;s the baseline it improves?</strong> If you can&rsquo;t measure today&rsquo;s cost, you can&rsquo;t prove tomorrow&rsquo;s savings.</li>
+          <li><strong>Who owns it in month six?</strong> Models drift. Data changes. Someone has to retrain, or the value quietly decays.</li>
+        </ol>
+        <p>
+          Question three is the one that kills most projects &mdash; in the useful way. Here&rsquo;s what we run
+          instead of asking teams whether they &ldquo;use AI&rdquo;:
+        </p>
+        <CodeBlock file="value_check.sql" lines={SQL_LINES} />
+        <p>
+          Run that before the pilot and after 90 days of production. If the three numbers didn&rsquo;t move in
+          a direction a CFO cares about, the dashboard was decoration.
+        </p>
+        <ValueTable />
+      </section>
+
+      <section id="s5" data-reveal className="prose">
+        <H2 n="05">Monday morning</H2>
+        <p>
+          None of this requires a transformation program. It requires one process and four weeks:
+        </p>
+        <ul>
+          <li>Pick a process with a known unit cost &mdash; support triage, document intake, CV screening.</li>
+          <li>Measure the baseline for two weeks <em>before</em> touching a model.</li>
+          <li>Run a four-week POC with the kill criterion written down before you start.</li>
+          <li>Production if it wins. A written post-mortem if it doesn&rsquo;t &mdash; which is also a win, just a cheaper one.</li>
+        </ul>
+        <p>
+          And if AI doesn&rsquo;t make sense for the process? The POC&rsquo;s job is to tell you that. Ours put it
+          in writing &mdash; it&rsquo;s called the <a href="ai-integration.html">Honesty Guarantee</a> for a reason.
+        </p>
+      </section>
+
+      <section id="takeaways" data-reveal className="prose">
+        <div className="takeaways">
+          <p className="t-h3 uppercase" style={{ margin: 0 }}>Key takeaways</p>
+          <ul style={{ marginBottom: 0 }}>
+            <li>88% measures adoption, not value &mdash; usage surveys count licenses and pilots alike.</li>
+            <li>Value lives in three places: unit cost, conversion, avoided risk. All currency-signed.</li>
+            <li>No baseline, no proof &mdash; measure before you build.</li>
+            <li>A POC without a kill criterion is a subscription, not an experiment.</li>
+          </ul>
+        </div>
+        <p className="footnote">
+          * Figures marked as audit medians and case-study results are illustrative placeholders &mdash;
+          cite your sources here before publishing.
+        </p>
+      </section>
+    </article>
+  );
+}
+
+/* ---------- TAGS + AUTHOR + PREV/NEXT + RELATED ---------- */
+function TagsRow() {
+  return (
+    <div data-reveal className="container-x mt-4 flex flex-wrap items-center gap-2">
+      <span className="t-chip uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Tagged</span>
+      {ARTICLE.tags.map((t) => (
+        <span key={t} className="chip t-chip" style={{ border: '1px solid var(--border)' }}>#{t}</span>
+      ))}
+    </div>
+  );
+}
+
+function AuthorCard() {
+  return (
+    <section id="author" className="relative w-full z-[1] pt-14 md:pt-20">
+      <div className="container-x">
+        <div data-reveal className="rounded-3xl p-8 md:p-12 flex flex-col md:flex-row md:items-center gap-8"
+          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <span className="w-20 h-20 rounded-full flex items-center justify-center text-xl font-medium shrink-0"
+            style={{ background: 'var(--fg)', color: 'var(--bg)' }}>{ARTICLE.authorInitials}</span>
+          <div className="flex flex-col gap-3 flex-1">
+            <p className="t-chip uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Written by</p>
+            <p className="t-h3">{ARTICLE.author} &mdash; {ARTICLE.authorRole}</p>
+            <p className="t-body" style={{ color: 'var(--muted)' }}>
+              {/* TODO: replace with the real author bio */}
+              Elena leads the Data &amp; AI practice at TCG, where she has audited 40+ enterprise AI
+              deployments. She has yet to see a chatbot impress her more than a well-designed pipeline.
+            </p>
+          </div>
+          <a href="insights.html" className="link-arrow self-start md:self-center shrink-0">
+            More from Elena <Icon name="arrow" className="w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PrevNext() {
+  return (
+    <div className="container-x mt-3">
+      <div data-reveal className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* TODO: point at the previous article's page when it exists */}
+        <a href="#" onClick={(e) => e.preventDefault()}
+          className="group rounded-2xl p-6 flex flex-col gap-2 transition-transform duration-200 hover:-translate-y-1"
+          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <span className="t-chip uppercase tracking-wide flex items-center gap-2" style={{ color: 'var(--muted)' }}>
+            <Icon name="arrowL" className="w-3.5" /> Previous · {PREV.date}
+          </span>
+          <span className="t-h3" style={{ lineHeight: 1.25 }}>{PREV.title}</span>
+        </a>
+
+        <div aria-disabled="true" className="rounded-2xl p-6 flex flex-col gap-2 justify-center"
+          style={{ background: 'var(--card)', border: '1px dashed var(--border)', opacity: .6 }}>
+          <span className="t-chip uppercase tracking-wide flex items-center gap-2" style={{ color: 'var(--muted)' }}>
+            Next <Icon name="arrow" className="w-3.5" />
+          </span>
+          <span className="t-h3" style={{ color: 'var(--muted)' }}>You&rsquo;re reading the latest insight.</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RelatedArticles() {
+  return (
+    <section id="related" className="relative w-full z-[1] pt-14 md:pt-20">
+      <div className="container-x flex flex-col gap-10">
+        <h2 data-reveal className="t-h2 uppercase">Keep reading</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {RELATED.map((a, i) => (
+            <a key={a.id} href="#" onClick={(e) => e.preventDefault()} data-reveal
+              style={{ '--d': (i * 90) + 'ms', background: 'var(--card)', border: '1px solid var(--border)' }}
+              className="group relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4 transition-transform duration-200 hover:-translate-y-1">
+
+              <span className="inline-flex items-center gap-2 t-chip uppercase tracking-wide self-start" style={{ color: 'var(--muted)' }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: a.color }} />
+                {a.category}
+              </span>
+              <h3 className="t-h3" style={{ lineHeight: 1.25 }}>{a.title}</h3>
+              <p className="t-small" style={{ color: 'var(--muted)' }}>{a.excerpt}</p>
+              <span className="mt-auto flex items-center justify-between gap-3 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+                <span className="t-chip" style={{ color: 'var(--muted)' }}>{a.author} · {a.date} · {a.read} min</span>
+                <Icon name="arrow" className="w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- NEWSLETTER ---------- */
+function Newsletter() {
+  const [sent, setSent] = useState(false);
+  return (
+    <section id="subscribe" className="relative w-full z-[1] py-14 md:py-20">
+      <div className="container-x">
+        <div data-reveal className="relative overflow-hidden rounded-3xl px-6 py-14 md:px-16 md:py-20 flex flex-col items-center text-center gap-7"
+          style={{ background: 'linear-gradient(135deg, rgb(225,252,6) 0%, rgb(196,222,3) 100%)', color: '#000' }}>
+          <Icon name="mail" className="absolute -top-8 -right-8 w-48 h-48" style={{ opacity: .12 }} />
+
+          <h2 className="t-h2-sm uppercase max-w-[22ch]">Get insights before your competitors do.</h2>
+          <p className="t-body max-w-md" style={{ color: 'rgba(0,0,0,.72)' }}>
+            One email per week. Real engineering lessons. Unsubscribe anytime.
+          </p>
+
+          {sent ? (
+            <div className="fade-in flex items-center gap-3">
+              <span className="pop w-11 h-11 rounded-full flex items-center justify-center" style={{ background: '#000', color: 'rgb(225,252,6)' }}>
+                <Icon name="check" className="w-5" />
+              </span>
+              <p className="t-h3">You&rsquo;re on the list.</p>
+            </div>
+          ) : (
+            <form className="w-full max-w-xl flex flex-col sm:flex-row gap-3"
+              onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
+              <input required type="email" placeholder="Your email" aria-label="Email for newsletter"
+                className="flex-1 h-[52px] rounded-xl px-4 w-full"
+                style={{ background: '#fff', border: '1px solid rgba(0,0,0,.15)', color: '#000' }} />
+              <button type="submit"
+                className="h-[52px] px-8 rounded-full text-[.92rem] whitespace-nowrap transition-transform hover:-translate-y-px"
+                style={{ background: '#000', color: '#fff' }}>
+                Subscribe
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- FOOTER ---------- */
+const FOOTER_SERVICES = [
+  { label: 'Custom Software',  href: 'custom-software.html' },
+  { label: 'Tech Consulting',  href: 'tech-consulting.html' },
+  { label: 'AI Integration',   href: 'ai-integration.html' },
+  { label: 'Cybersecurity',    href: 'cybersecurity.html' },
+  { label: 'Architecture & Modernization', href: '#' },
+  { label: 'Web & eCommerce',  href: '#' },
+  { label: 'Marketing & SEO',  href: '#' },
+  { label: 'Strategic Consulting', href: '#' }
+];
+
+function Footer() {
+  return (
+    <footer className="relative bg-black text-white z-[1]">
+      <div className="container-x py-12 md:py-16 flex flex-col gap-10">
+        <div className="flex flex-col lg:flex-row justify-between gap-10">
+          <div className="flex flex-col gap-4 max-w-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[13px] bg-white text-black">T</span>
+              <span>TCG</span>
+            </div>
+            <p className="t-small text-gray-400">
+              Insights from real engineering &mdash; no fluff, no buzzwords, just what 2,000+ projects taught us.
+            </p>
+            <a href="insights.html" className="link-arrow text-white self-start" style={{ fontSize: '.85rem' }}>
+              <Icon name="arrowL" className="w-3.5" /> Back to all articles
+            </a>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h4 className="uppercase text-gray-400 text-sm tracking-tight">Services</h4>
+            <div className="flex flex-col gap-1.5 t-body">
+              {FOOTER_SERVICES.map((s) => (
+                <a key={s.label} href={s.href} className="hover:text-white transition-colors">{s.label}</a>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h4 className="uppercase text-gray-400 text-sm tracking-tight">Contact</h4>
+            <div className="flex flex-col gap-1.5 t-body">
+              <a href="tel:+34660014818" className="hover:text-white transition-colors">+34 660 014 818</a>
+              {/* TODO: replace with the real email address */}
+              <a href="mailto:hello@example.com" className="hover:text-white transition-colors">hello@example.com</a>
+              <a href="https://wa.me/34660014818" className="hover:text-white transition-colors">WhatsApp</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between gap-4 t-small text-gray-400">
+          <p>© {new Date().getFullYear()} TCG. All rights reserved.</p>
+          <a href="#" className="hover:text-white transition-colors">Privacy policy</a>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ---------- APP ---------- */
+function App() {
+  const [theme, setTheme] = useState(function () {
+    try { return localStorage.getItem('tcg-theme') || 'light'; }
+    catch (e) { return 'light'; }
+  });
+
+  const bodyRef = useRef(null);
+  const pct = useArticleProgress(bodyRef);
+  const activeToc = useScrollSpy(TOC_IDS);
+
+  useSectionTabMemory();
+  useReveal();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    try { localStorage.setItem('tcg-theme', theme); } catch (e) {}
+    var boot = document.getElementById('boot');
+    if (boot) boot.classList.add('hide');
+  }, [theme]);
+
+  return (
+    <div className="min-h-[100svh]" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
+      <ScrollProgress />
+      <Nav theme={theme} setTheme={setTheme} />
+      <main className="flex flex-col">
+        <ArticleHero />
+        <FeaturedVisual />
+
+        <div className="container-x mt-10 md:mt-14 grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-10 lg:gap-16 pb-14 md:pb-20">
+          <TOCSidebar active={activeToc} pct={pct} />
+          <ArticleBody bodyRef={bodyRef} />
+        </div>
+
+        <TagsRow />
+        <AuthorCard />
+        <PrevNext />
+        <RelatedArticles />
+        <Newsletter />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+} catch (err) {
+  var el = document.getElementById('err');
+  el.style.display = 'block';
+  el.textContent = 'Boot error:\n\n' + (err && err.stack || err);
+}
+</script>
+</body>
+</html>
