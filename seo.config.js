@@ -77,7 +77,7 @@ export const SITE_URL =
 
 export const SITE_NAME = 'The Cloud Group';
 
-export const DEFAULT_IMAGE = 'og/favicon.svg';
+export const DEFAULT_IMAGE = 'og/image.png';
 
 export const PAGES = [
   {
@@ -85,7 +85,7 @@ export const PAGES = [
     title: 'The Cloud Group | Custom Software That Ships On Time',
     description:
       "We build custom software that ships on time — or you don't pay.",
-    image: 'og/favicon.svg',
+    image: 'og/image.png',
     type: 'website',
     // ↓ Real content Google can index
     h1: 'Custom software that ships on time — or you don’t pay',
@@ -103,7 +103,7 @@ export const PAGES = [
     title: 'Custom Software Development | The Cloud Group',
     description:
       'ERP, CRM, mobile apps, and SaaS platforms built to spec.',
-    image: 'og/favicon.svg',
+    image: 'og/image.png',
     type: 'website',
     h1: 'Custom software development',
     intro:
@@ -120,7 +120,7 @@ export const PAGES = [
     title: 'AI Integration Services | The Cloud Group',
     description:
       'AI agents, chatbots, and ML/NLP systems integrated into your business workflows.',
-    image: 'og/favicon.svg',
+    image: 'og/image.png',
     type: 'website',
     h1: 'AI integration services',
     intro:
@@ -137,7 +137,7 @@ export const PAGES = [
     title: 'Technology Consulting | The Cloud Group',
     description:
       'Strategic digital transformation, process analysis, and technical due diligence.',
-    image: 'og/favicon.svg',
+    image: 'og/image.png',
     type: 'website',
     h1: 'Technology consulting',
     intro:
@@ -154,7 +154,7 @@ export const PAGES = [
     title: 'Cybersecurity Services | The Cloud Group',
     description:
       'Security audits, hardening, and compliance for growing companies.',
-    image: 'og/favicon.svg',
+    image: 'og/image.png',
     type: 'website',
     h1: 'Cybersecurity services',
     intro:
@@ -171,7 +171,7 @@ export const PAGES = [
     title: 'Insights & Articles | The Cloud Group',
     description:
       'Engineering notes, architecture decisions, and delivery lessons from real projects.',
-    image: 'og/favicon.svg',
+    image: 'og/image.png',
     type: 'website',
     h1: 'Insights and articles',
     intro:
