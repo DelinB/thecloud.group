@@ -67,7 +67,7 @@ function buildSeoTags(page) {
       '@type': 'Organization',
       name: SITE_NAME,
       url: SITE_URL,
-      logo: absoluteImage('favicon.svg'),
+      logo: absoluteImage('image.png'),
       sameAs: [],
     })}
     </script>
@@ -132,15 +132,14 @@ function renderPage(page) {
   // Inject <head> tags.
   html = html.replace(/<\/head>/i, `  ${seoTags}\n  </head>`);
 
-  // Inject fallback content INSIDE #root. React wipes it on mount.
+  // Inject fallback content INSIDE #root, wrapped in [data-seo-fallback].
   html = html.replace(
-    /<div id="root"><\/div>/i,
-    `<div id="root">${bodyContent}</div>`
+    /<div id="root">\s*<\/div>/i,
+    `<div id="root"><div data-seo-fallback>${bodyContent}</div></div>`
   );
 
   return html;
 }
-
 /* ------------------------------------------------------------------ */
 /*  Write everything                                                   */
 /* ------------------------------------------------------------------ */
