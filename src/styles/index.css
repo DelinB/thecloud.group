@@ -1,0 +1,51 @@
+/* ------------------------------------------------------------------
+   SCROLL PROGRESS — compositor path
+   In browsers that support CSS scroll-driven animations, this runs
+   entirely on the compositor thread: zero JavaScript per frame.
+   The JS path in <ScrollProgress> is a fallback only.
+------------------------------------------------------------------ */
+@supports (animation-timeline: scroll()) {
+  .scroll-progress-native {
+    animation: scroll-progress-grow linear;
+    animation-timeline: scroll(root block);
+    transform: scaleX(0); /* reset — the animation overrides this */
+  }
+
+  @keyframes scroll-progress-grow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+}
+
+/* ------------------------------------------------------------------
+   LENIS — base styles
+   Lenis needs the <html> to be the scroll container and disables
+   native smooth scroll so it can own the interpolation.
+------------------------------------------------------------------ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Reduced motion: kill the CSS animation, Lenis handles the 1:1 case */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress-native {
+    animation: none !important;
+  }
+}
