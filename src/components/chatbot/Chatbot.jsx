@@ -249,7 +249,6 @@ export default function Chatbot() {
       setLead((prev) => ({ ...prev, [field]: value }));
     }
 
-    // Find the current node to get the next target
     const currentNode = flow.nodes[nodeId];
     const next = currentNode?.next || currentNode?.input?.next;
     if (next) {
@@ -274,8 +273,7 @@ export default function Chatbot() {
       {/* ============== WINDOW ============== */}
       {open && (
         <div
-          className="fixed bottom-24 right-4 z-[200] flex w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[color:var(--bg)] shadow-[0_30px_80px_rgba(0,0,0,.25)] sm:right-6"
-          style={{ maxHeight: 'min(640px, calc(100vh - 8rem))' }}
+          className="chatbot-window fixed right-4 z-[200] flex w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[color:var(--bg)] shadow-[0_30px_80px_rgba(0,0,0,.25)] sm:right-6"
         >
           {/* Header */}
           <header className="flex items-center justify-between gap-3 border-b border-[var(--border)] bg-[color:var(--card)] px-4 py-3">
@@ -375,7 +373,7 @@ export default function Chatbot() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="group fixed bottom-5 right-4 z-[200] flex items-center gap-3 rounded-full bg-[var(--fg)] py-2 pl-4 pr-2 text-sm font-medium text-[var(--bg)] shadow-[0_20px_50px_rgba(0,0,0,.28)] transition-transform duration-300 hover:-translate-y-0.5 sm:right-6"
+          className="chatbot-launcher group fixed right-4 z-[200] flex items-center gap-3 rounded-full bg-[var(--fg)] py-2 pl-4 pr-2 text-sm font-medium text-[var(--bg)] shadow-[0_20px_50px_rgba(0,0,0,.28)] transition-transform duration-300 hover:-translate-y-0.5 sm:right-6"
           aria-label="Open chat"
         >
           <span className="hidden sm:inline">Chat with Cloud</span>
@@ -387,6 +385,35 @@ export default function Chatbot() {
       )}
 
       <style>{`
+        /* ------------------------------------------------------------------
+           Position above the mobile bottom nav.
+           Bottom nav is 64px tall + safe area inset. Add 12px gap.
+        ------------------------------------------------------------------ */
+        .chatbot-launcher {
+          bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 12px);
+        }
+
+        .chatbot-window {
+          bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 12px);
+          max-height: min(
+            640px,
+            calc(
+              100dvh - 64px - env(safe-area-inset-bottom, 0px) - 88px
+            )
+          );
+        }
+
+        /* On xl+ the bottom nav is hidden — anchor to normal corner */
+        @media (min-width: 1280px) {
+          .chatbot-launcher {
+            bottom: 1.5rem;
+          }
+          .chatbot-window {
+            bottom: 1.5rem;
+            max-height: min(640px, calc(100vh - 8rem));
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .animate-ping { animation: none !important; }
         }

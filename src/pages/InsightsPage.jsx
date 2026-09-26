@@ -16,64 +16,76 @@
 // const FEATURED = {
 //   category: 'Data & AI',
 //   title: "The 88% uses AI. That doesn't mean the 88% is creating value.",
-//   author: '[Author Name]',
+//   author: 'Marcus Feld',
 //   readingTime: '8 min read',
 //   date: 'September 23, 2026',
-//   href: '#featured-article',
+//   slug: 'the-88-percent-uses-ai',
 // };
 
 // const ARTICLES = [
 //   {
 //     id: 1,
+//     slug: 'rebuilding-14-year-old-erp',
 //     category: 'Real Cases',
-//     title: '[Article title — Real Cases]',
-//     excerpt: '[Add a two-line case-study excerpt here.]',
-//     author: '[Author Name]',
+//     title: "We rebuilt a 14-year-old ERP in 9 months. Here's what we'd do differently.",
+//     excerpt:
+//       'A mid-size logistics company ran their entire operation on a system nobody could modify. The rebuild worked — the sequencing was wrong.',
+//     author: 'Elena Ríos',
 //     date: 'September 2026',
 //     readingTime: '6 min read',
 //   },
 //   {
 //     id: 2,
+//     slug: 'architecture-review-saved-400k',
 //     category: 'Technology Consulting',
-//     title: '[Article title — Technology Consulting]',
-//     excerpt: '[Add a two-line consulting insight here.]',
-//     author: '[Author Name]',
+//     title: 'The architecture review that saved a client $400k',
+//     excerpt:
+//       'They were about to sign a three-year contract for a platform they didn’t need. Two weeks of architecture review changed the decision.',
+//     author: 'Tomas Berg',
 //     date: 'September 2026',
 //     readingTime: '7 min read',
 //   },
 //   {
 //     id: 3,
+//     slug: 'data-pipeline-is-lying',
 //     category: 'Data & AI',
-//     title: '[Article title — Data & AI]',
-//     excerpt: '[Add a two-line AI or data engineering insight here.]',
-//     author: '[Author Name]',
+//     title: 'Your data pipeline is probably lying to you',
+//     excerpt:
+//       'Silent failures, timezone drift, and null handling — the three data quality bugs that break dashboards without warning anyone.',
+//     author: 'Priya Nair',
 //     date: 'September 2026',
 //     readingTime: '5 min read',
 //   },
 //   {
 //     id: 4,
+//     slug: 'integration-tests-before-unit-tests',
 //     category: 'Software Engineering',
-//     title: '[Article title — Software Engineering]',
-//     excerpt: '[Add a two-line software engineering lesson here.]',
-//     author: '[Author Name]',
+//     title: 'Why we still write integration tests before unit tests',
+//     excerpt:
+//       'Unit tests give you confidence in functions. Integration tests give you confidence in the system. Only one of those ships to production.',
+//     author: 'Daniel Okafor',
 //     date: 'September 2026',
 //     readingTime: '9 min read',
 //   },
 //   {
 //     id: 5,
+//     slug: 'per-user-pricing-trap',
 //     category: 'SaaS & Product',
-//     title: '[Article title — SaaS & Product]',
-//     excerpt: '[Add a two-line product or SaaS lesson here.]',
-//     author: '[Author Name]',
+//     title: 'The per-user pricing trap (and how to escape it)',
+//     excerpt:
+//       'SaaS made sense when software was rented. When your team grows, the math stops working. Here’s the break-even point.',
+//     author: 'Sara Lindqvist',
 //     date: 'September 2026',
 //     readingTime: '6 min read',
 //   },
 //   {
 //     id: 6,
+//     slug: 'hiring-is-not-a-strategy',
 //     category: 'Founder Notes',
-//     title: '[Article title — Founder Notes]',
-//     excerpt: '[Add a two-line founder lesson here.]',
-//     author: '[Author Name]',
+//     title: 'Hiring senior engineers is not a growth strategy',
+//     excerpt:
+//       'Every founder thinks the next hire fixes the bottleneck. Usually the bottleneck is a decision nobody wants to make.',
+//     author: 'Marcus Feld',
 //     date: 'September 2026',
 //     readingTime: '4 min read',
 //   },
@@ -82,8 +94,8 @@
 // function Reveal({ children, className = '', delay = 0 }) {
 //   return (
 //     <div
-//       className={`transition-all duration-700 ease-out ${className}`}
-//       style={{ transitionDelay: `${delay}ms` }}
+//       className={`motion-safe:animate-[pageFadeUp_.65s_ease-out_both] ${className}`}
+//       style={{ animationDelay: `${delay}ms` }}
 //     >
 //       {children}
 //     </div>
@@ -119,9 +131,12 @@
 //         if (!email.trim()) return;
 //         setSubmitted(true);
 //       }}
-//       className={compact ? 'flex w-full flex-col gap-2 sm:flex-row' : 'flex w-full flex-col gap-2 sm:flex-row'}
+//       className="flex w-full flex-col gap-2 sm:flex-row"
 //     >
-//       <label className="sr-only" htmlFor={compact ? 'newsletter-email-mid' : 'newsletter-email-top'}>
+//       <label
+//         className="sr-only"
+//         htmlFor={compact ? 'newsletter-email-mid' : 'newsletter-email-top'}
+//       >
 //         Email address
 //       </label>
 
@@ -165,32 +180,83 @@
 //   );
 // }
 
+// /* ------------------------------------------------------------------ */
+// /*  HERO H1 — per-line mask reveal + shimmer on the payoff line       */
+// /* ------------------------------------------------------------------ */
+
+// /**
+//  * Lines declared here so timing constants stay in one place.
+//  *  - `gradient: true` enables shimmer on that line only.
+//  *  - The outer `.hero-h1-line` masks the inner text (overflow hidden).
+//  *  - The inner `.hero-h1-line__inner` slides up from below.
+//  *  - The gradient lives on a third nested span so the reveal transform
+//  *    and the shimmer animation never fight over `animation`.
+//  */
+// const H1_LINES = [
+//   { text: 'Insights from', gradient: false },
+//   { text: 'real engineering.', gradient: true },
+// ];
+
+// const H1_BASE_DELAY = 180;
+// const H1_LINE_STAGGER = 140;
+// const H1_LINE_DURATION = 700;
+
+// function HeroH1() {
+//   return (
+//     <h1 className="text-[clamp(2.7rem,7vw,6.4rem)] font-normal leading-[.92] tracking-[-.055em]">
+//       {H1_LINES.map((line, i) => (
+//         <span
+//           key={line.text}
+//           className="hero-h1-line"
+//           style={{
+//             '--wd': `${H1_BASE_DELAY + i * H1_LINE_STAGGER}ms`,
+//             '--dur': `${H1_LINE_DURATION}ms`,
+//           }}
+//         >
+//           <span className="hero-h1-line__inner">
+//             {line.gradient ? (
+//               <span className="inline-block bg-gradient-to-r from-[var(--fg)] via-[var(--accent)] to-[var(--fg)] bg-[length:200%_100%] bg-clip-text text-transparent motion-safe:animate-[gradientShift_5s_ease_infinite]">
+//                 {line.text}
+//               </span>
+//             ) : (
+//               line.text
+//             )}
+//           </span>
+//         </span>
+//       ))}
+//     </h1>
+//   );
+// }
+
 // function Hero({ query, setQuery }) {
 //   return (
 //     <section className="relative overflow-hidden pt-32 pb-16">
 //       <GlobalHeroBackground />
 //       <div
-//         aria-hidden
-//         className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--bg)] via-[color:var(--bg)/.78] to-transparent"
+//         aria-hidden="true"
+//         className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--bg)] via-[color:color-mix(in_srgb,var(--bg)_78%,transparent)] to-transparent"
 //       />
 
 //       <div className={`${CONTAINER} relative z-10`}>
 //         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
-//           <Reveal>
-//             <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
-//               Insights
-//             </p>
+//           <div>
+//             <Reveal delay={80}>
+//               <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
+//                 Insights
+//               </p>
+//             </Reveal>
 
-//             <h1 className="max-w-[12ch] text-[clamp(2.7rem,7vw,6.4rem)] font-normal leading-[.92] tracking-[-.055em]">
-//               Insights from real engineering
-//             </h1>
+//             {/* H1 owns its own per-line reveal — no wrapper Reveal needed. */}
+//             <HeroH1 />
 
-//             <p className="mt-6 max-w-2xl text-[clamp(.96rem,1.1vw,1.08rem)] leading-[1.65] text-[var(--muted)]">
-//               No fluff. No buzzwords. Just what we&apos;ve learned building 2,000+ projects.
-//             </p>
-//           </Reveal>
+//             <Reveal delay={520}>
+//               <p className="mt-6 max-w-2xl text-[clamp(.96rem,1.1vw,1.08rem)] leading-[1.65] text-[var(--muted)]">
+//                 No fluff. No buzzwords. Just what we&apos;ve learned building 2,000+ projects.
+//               </p>
+//             </Reveal>
+//           </div>
 
-//           <Reveal delay={120}>
+//           <Reveal delay={620}>
 //             <div className="rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 sm:p-6">
 //               <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
 //                 <SearchIcon className="w-4" />
@@ -237,7 +303,7 @@
 //             <div className="grid gap-0 lg:grid-cols-[1.1fr_.9fr]">
 //               <div className="relative min-h-[320px] overflow-hidden p-7 sm:p-10 lg:p-12">
 //                 <div
-//                   aria-hidden
+//                   aria-hidden="true"
 //                   className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--accent)] opacity-25 blur-3xl"
 //                 />
 //                 <div className="relative">
@@ -250,41 +316,44 @@
 //                   </h2>
 
 //                   <a
-//                     href={FEATURED.href}
+//                     href={`/insights/${FEATURED.slug}`}
 //                     className="group mt-8 inline-flex items-center gap-3 text-sm font-medium"
 //                   >
 //                     <span className="underline underline-offset-4">Read Full Article</span>
 //                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
-//                       <Icon name="arrow" className="w-4 transition-transform group-hover:translate-x-1" />
+//                       <Icon
+//                         name="arrow"
+//                         className="w-4 transition-transform group-hover:translate-x-1"
+//                       />
 //                     </span>
 //                   </a>
 //                 </div>
 //               </div>
 
-//               <div className="border-t border-[color:var(--bg)/.14] bg-[color:var(--bg)/.08] p-7 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
+//               <div className="border-t border-[color:color-mix(in_srgb,var(--bg)_14%,transparent)] bg-[color:color-mix(in_srgb,var(--bg)_8%,transparent)] p-7 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
 //                 <div className="flex h-full flex-col justify-between">
 //                   <div>
-//                     <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[color:var(--bg)/.5]">
+//                     <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[color:color-mix(in_srgb,var(--bg)_50%,transparent)]">
 //                       Article details
 //                     </p>
 
 //                     <div className="mt-6 space-y-5">
 //                       <div>
-//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:var(--bg)/.45]">
+//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:color-mix(in_srgb,var(--bg)_45%,transparent)]">
 //                           Author
 //                         </p>
 //                         <p className="mt-1 text-sm font-medium">{FEATURED.author}</p>
 //                       </div>
 
 //                       <div>
-//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:var(--bg)/.45]">
+//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:color-mix(in_srgb,var(--bg)_45%,transparent)]">
 //                           Reading time
 //                         </p>
 //                         <p className="mt-1 text-sm font-medium">{FEATURED.readingTime}</p>
 //                       </div>
 
 //                       <div>
-//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:var(--bg)/.45]">
+//                         <p className="text-[10px] uppercase tracking-[.12em] text-[color:color-mix(in_srgb,var(--bg)_45%,transparent)]">
 //                           Published
 //                         </p>
 //                         <p className="mt-1 text-sm font-medium">{FEATURED.date}</p>
@@ -292,7 +361,7 @@
 //                     </div>
 //                   </div>
 
-//                   <div className="mt-10 flex items-center gap-2 text-xs text-[color:var(--bg)/.55]">
+//                   <div className="mt-10 flex items-center gap-2 text-xs text-[color:color-mix(in_srgb,var(--bg)_55%,transparent)]">
 //                     <Icon name="clock" className="w-4" />
 //                     <span>{FEATURED.readingTime}</span>
 //                   </div>
@@ -308,12 +377,14 @@
 
 // function ArticleCard({ article, index }) {
 //   return (
-//     <article className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--fg)/.24] sm:p-6">
+//     <article className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[color:color-mix(in_srgb,var(--fg)_24%,transparent)] sm:p-6">
 //       <div className="flex items-center justify-between gap-4">
 //         <span className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
 //           {article.category}
 //         </span>
-//         <span className="text-[10px] text-[var(--muted)]">{String(index + 1).padStart(2, '0')}</span>
+//         <span className="text-[10px] text-[var(--muted)]">
+//           {String(index + 1).padStart(2, '0')}
+//         </span>
 //       </div>
 
 //       <h3 className="mt-6 line-clamp-2 min-h-[3.4rem] text-xl leading-[1.15] tracking-[-.025em]">
@@ -333,11 +404,14 @@
 //         <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
 //           <span className="text-[11px] text-[var(--muted)]">{article.date}</span>
 //           <a
-//             href={`#article-${article.id}`}
+//             href={`/insights/${article.slug}`}
 //             className="inline-flex items-center gap-1.5 text-xs font-semibold"
 //           >
 //             Read
-//             <Icon name="arrow" className="w-3.5 transition-transform group-hover:translate-x-1" />
+//             <Icon
+//               name="arrow"
+//               className="w-3.5 transition-transform group-hover:translate-x-1"
+//             />
 //           </a>
 //         </div>
 //       </div>
@@ -491,13 +565,13 @@
 //   return (
 //     <section id="consultation" className="relative overflow-hidden py-20 sm:py-28">
 //       <div
-//         aria-hidden
+//         aria-hidden="true"
 //         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,color-mix(in_srgb,var(--accent)_17%,transparent),transparent_36%),linear-gradient(180deg,var(--card),var(--bg))]"
 //       />
 
 //       <div className={`${CONTAINER} relative`}>
 //         <Reveal>
-//           <div className="mx-auto flex max-w-4xl flex-col items-center rounded-[2rem] border border-[var(--border)] bg-[color:var(--bg)/.86] px-6 py-12 text-center backdrop-blur-xl sm:px-10 sm:py-16">
+//           <div className="mx-auto flex max-w-4xl flex-col items-center rounded-[2rem] border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--bg)_86%,transparent)] px-6 py-12 text-center backdrop-blur-xl sm:px-10 sm:py-16">
 //             <p className="text-xs font-semibold uppercase tracking-[.17em] text-[var(--muted)]">
 //               Talk to the team
 //             </p>
@@ -514,7 +588,10 @@
 //             >
 //               Book Free Consultation
 //               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
-//                 <Icon name="arrow" className="w-4 transition-transform group-hover:translate-x-1" />
+//                 <Icon
+//                   name="arrow"
+//                   className="w-4 transition-transform group-hover:translate-x-1"
+//                 />
 //               </span>
 //             </a>
 //           </div>
@@ -543,6 +620,38 @@
 //       <FinalCTA />
 
 //       <style>{`
+//         @keyframes pageFadeUp {
+//           from { opacity: 0; transform: translateY(18px); }
+//           to   { opacity: 1; transform: translateY(0); }
+//         }
+
+//         @keyframes gradientShift {
+//           0%, 100% { background-position: 0% 50%; }
+//           50%      { background-position: 100% 50%; }
+//         }
+
+//         /* H1 per-line mask reveal */
+//         .hero-h1-line {
+//           display: block;
+//           overflow: hidden;
+//           padding-bottom: 0.08em; /* keeps g/y/p descenders from being clipped */
+//         }
+
+//         .hero-h1-line__inner {
+//           display: block;
+//         }
+
+//         @media (prefers-reduced-motion: no-preference) {
+//           .hero-h1-line__inner {
+//             animation: heroLineRise var(--dur, 700ms) cubic-bezier(.22, 1, .36, 1) var(--wd, 0ms) both;
+//           }
+//         }
+
+//         @keyframes heroLineRise {
+//           from { transform: translateY(110%); opacity: 0; }
+//           to   { transform: translateY(0);    opacity: 1; }
+//         }
+
 //         .line-clamp-2 {
 //           display: -webkit-box;
 //           -webkit-line-clamp: 2;
@@ -560,10 +669,26 @@
 //   );
 // }
 
+
+
 import React, { useMemo, useState } from 'react';
 import { CONTAINER, SECTION } from '../components/shared/constants';
 import { Icon } from '../components/shared/Icon';
 import { GlobalHeroBackground } from '../components/shared/GlobalHeroBackground';
+
+/* ------------------------------------------------------------------ */
+/*  BRAND — colors from the The Cloud Group logo                       */
+/*  Golden yellow: #E5B32B  ·  Deep gold: #C99A1A  ·  Ink: #1c1608     */
+/* ------------------------------------------------------------------ */
+
+const BRAND = {
+  gold: '#E5B32B',
+  goldDeep: '#C99A1A',
+  goldBright: '#FFC93C',
+  goldSoft: '#F0C244',
+  goldDark: '#A67C0F',
+  ink: '#1c1608',
+};
 
 const CATEGORIES = [
   'All',
@@ -656,11 +781,38 @@ const ARTICLES = [
 function Reveal({ children, className = '', delay = 0 }) {
   return (
     <div
-      className={`transition-all duration-700 ease-out ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
+      className={`motion-safe:animate-[pageFadeUp_.65s_ease-out_both] ${className}`}
+      style={{ animationDelay: `${delay}ms` }}
     >
       {children}
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  LOGO — inline SVG approximation of The Cloud Group mark            */
+/* ------------------------------------------------------------------ */
+
+function Logo({ className = '' }) {
+  return (
+    <span className={`inline-flex items-center gap-3 ${className}`}>
+      <svg
+        viewBox="0 0 80 56"
+        className="h-10 w-auto shrink-0"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M22 50c-9 0-16-7-16-15 0-6 4-12 10-14C17 12 24 6 33 6c6 0 11 3 14 7 2-1 5-1 8-1 8 0 14 6 14 14v2c6 2 10 7 10 13 0 9-7 16-16 16H22z" />
+        <path
+          d="M38 22c-4 0-7 3-7 6 0 4 4 8 12 14 8-6 12-10 12-14 0-3-3-6-7-6-3 0-5 2-5 2s-2-2-5-2z"
+          fill="var(--bg)"
+        />
+      </svg>
+      <span className="flex flex-col leading-none tracking-[0.02em]">
+        <span className="text-[11px] font-bold tracking-[0.32em]">THE CLOUD</span>
+        <span className="mt-1 text-[20px] font-bold tracking-[0.04em]">GROUP</span>
+      </span>
+    </span>
   );
 }
 
@@ -721,13 +873,20 @@ function SubscribeForm({ compact = false }) {
       <button
         type="submit"
         className={[
-          'group inline-flex shrink-0 items-center justify-center gap-3 rounded-full bg-[var(--fg)] font-medium text-[var(--bg)]',
+          'group inline-flex shrink-0 items-center justify-center gap-3 rounded-full font-medium',
           compact ? 'h-11 px-4 text-xs' : 'h-12 px-5 text-sm',
         ].join(' ')}
+        style={{
+          background: 'var(--accent)',
+          color: 'var(--accent-ink)',
+        }}
       >
         <span>{submitted ? 'Subscribed' : 'Subscribe'}</span>
         {!submitted && (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)]">
+          <span
+            className="flex h-7 w-7 items-center justify-center rounded-full"
+            style={{ background: 'var(--accent-ink)', color: 'var(--accent)' }}
+          >
             <Icon name="arrow" className="w-3.5" />
           </span>
         )}
@@ -742,6 +901,49 @@ function SubscribeForm({ compact = false }) {
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*  HERO H1 — per-line mask reveal + shimmer on the payoff line       */
+/* ------------------------------------------------------------------ */
+
+const H1_LINES = [
+  { text: 'Insights from', gradient: false },
+  { text: 'real engineering.', gradient: true },
+];
+
+const H1_BASE_DELAY = 180;
+const H1_LINE_STAGGER = 140;
+const H1_LINE_DURATION = 700;
+
+const H1_END =
+  H1_BASE_DELAY + (H1_LINES.length - 1) * H1_LINE_STAGGER + H1_LINE_DURATION;
+
+function HeroH1() {
+  return (
+    <h1 className="text-[clamp(2.7rem,7vw,6.4rem)] font-normal leading-[.92] tracking-[-.055em]">
+      {H1_LINES.map((line, i) => (
+        <span
+          key={line.text}
+          className="hero-h1-line"
+          style={{
+            '--wd': `${H1_BASE_DELAY + i * H1_LINE_STAGGER}ms`,
+            '--dur': `${H1_LINE_DURATION}ms`,
+          }}
+        >
+          <span className="hero-h1-line__inner">
+            {line.gradient ? (
+              <span className="inline-block bg-gradient-to-r from-[var(--fg)] via-[var(--accent)] to-[var(--fg)] bg-[length:200%_100%] bg-clip-text text-transparent motion-safe:animate-[gradientShift_5s_ease_infinite]">
+                {line.text}
+              </span>
+            ) : (
+              line.text
+            )}
+          </span>
+        </span>
+      ))}
+    </h1>
+  );
+}
+
 function Hero({ query, setQuery }) {
   return (
     <section className="relative overflow-hidden pt-32 pb-16">
@@ -753,23 +955,30 @@ function Hero({ query, setQuery }) {
 
       <div className={`${CONTAINER} relative z-10`}>
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
-          <Reveal>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
-              Insights
-            </p>
+          <div>
+            {/* Brand logo — inherits brand gold from --accent */}
+            {/* <Reveal delay={40} className="mb-6 text-[color:var(--accent)]">
+              <Logo />
+            </Reveal> */}
 
-            <h1 className="max-w-[12ch] text-[clamp(2.7rem,7vw,6.4rem)] font-normal leading-[.92] tracking-[-.055em]">
-              Insights from real engineering
-            </h1>
+            <Reveal delay={80}>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
+                Insights
+              </p>
+            </Reveal>
 
-            <p className="mt-6 max-w-2xl text-[clamp(.96rem,1.1vw,1.08rem)] leading-[1.65] text-[var(--muted)]">
-              No fluff. No buzzwords. Just what we&apos;ve learned building 2,000+ projects.
-            </p>
-          </Reveal>
+            <HeroH1 />
 
-          <Reveal delay={120}>
+            <Reveal delay={H1_END + 60}>
+              <p className="mt-6 max-w-2xl text-[clamp(.96rem,1.1vw,1.08rem)] leading-[1.65] text-[var(--muted)]">
+                No fluff. No buzzwords. Just what we&apos;ve learned building 2,000+ projects.
+              </p>
+            </Reveal>
+          </div>
+
+          <Reveal delay={H1_END + 140}>
             <div className="rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 sm:p-6">
-              <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+              <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[var(--accent)]">
                 <SearchIcon className="w-4" />
                 Search articles
               </div>
@@ -787,7 +996,7 @@ function Hero({ query, setQuery }) {
               </div>
 
               <div className="mt-5 border-t border-[var(--border)] pt-5">
-                <p className="text-xs font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+                <p className="text-xs font-semibold uppercase tracking-[.12em] text-[var(--accent)]">
                   Weekly newsletter
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
@@ -815,7 +1024,7 @@ function FeaturedArticle() {
               <div className="relative min-h-[320px] overflow-hidden p-7 sm:p-10 lg:p-12">
                 <div
                   aria-hidden="true"
-                  className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--accent)] opacity-25 blur-3xl"
+                  className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--accent)] opacity-30 blur-3xl"
                 />
                 <div className="relative">
                   <span className="inline-flex rounded-full bg-[var(--accent)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--accent-ink)]">
@@ -888,12 +1097,19 @@ function FeaturedArticle() {
 
 function ArticleCard({ article, index }) {
   return (
-    <article className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[color:color-mix(in_srgb,var(--fg)_24%,transparent)] sm:p-6">
+    <article className="group flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[color:var(--card)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[color:color-mix(in_srgb,var(--accent)_45%,transparent)] sm:p-6">
       <div className="flex items-center justify-between gap-4">
-        <span className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.12em] text-[var(--muted)]">
+        <span
+          className="rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.12em]"
+          style={{
+            borderColor: 'color-mix(in srgb, var(--accent) 40%, transparent)',
+            background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+            color: 'var(--accent)',
+          }}
+        >
           {article.category}
         </span>
-        <span className="text-[10px] text-[var(--muted)]">
+        <span className="text-[10px] text-[var(--accent)]">
           {String(index + 1).padStart(2, '0')}
         </span>
       </div>
@@ -917,6 +1133,7 @@ function ArticleCard({ article, index }) {
           <a
             href={`/insights/${article.slug}`}
             className="inline-flex items-center gap-1.5 text-xs font-semibold"
+            style={{ color: 'var(--accent)' }}
           >
             Read
             <Icon
@@ -951,9 +1168,14 @@ function CategoryFilter({ category, setCategory }) {
                     onClick={() => setCategory(item)}
                     className={`shrink-0 rounded-full border px-4 py-2.5 text-xs font-medium transition-colors ${
                       active
-                        ? 'border-transparent bg-[var(--fg)] text-[var(--bg)]'
+                        ? 'border-transparent'
                         : 'border-[var(--border)] bg-[color:var(--card)] text-[var(--muted)] hover:text-[var(--fg)]'
                     }`}
+                    style={
+                      active
+                        ? { background: 'var(--accent)', color: 'var(--accent-ink)' }
+                        : undefined
+                    }
                   >
                     {item}
                   </button>
@@ -1031,7 +1253,8 @@ function ArticleGrid({ category, setCategory, query, setQuery }) {
                 setQuery('');
                 setCategory('All');
               }}
-              className="mt-5 rounded-full bg-[var(--fg)] px-5 py-2.5 text-xs font-medium text-[var(--bg)]"
+              className="mt-5 rounded-full px-5 py-2.5 text-xs font-medium"
+              style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}
             >
               Clear filters
             </button>
@@ -1050,7 +1273,7 @@ function MidNewsletter() {
           <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg)] p-6 sm:p-10 lg:p-12">
             <div className="grid gap-8 lg:grid-cols-[1fr_.85fr] lg:items-center">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">
+                <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--accent)]">
                   Weekly newsletter
                 </p>
                 <h2 className="mt-3 max-w-[15ch] text-[clamp(2rem,4vw,3.8rem)] leading-[.98] tracking-[-.05em]">
@@ -1077,7 +1300,7 @@ function FinalCTA() {
     <section id="consultation" className="relative overflow-hidden py-20 sm:py-28">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,color-mix(in_srgb,var(--accent)_17%,transparent),transparent_36%),linear-gradient(180deg,var(--card),var(--bg))]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,color-mix(in_srgb,var(--accent)_20%,transparent),transparent_36%),linear-gradient(180deg,var(--card),var(--bg))]"
       />
 
       <div className={`${CONTAINER} relative`}>
@@ -1131,6 +1354,47 @@ export default function InsightsPage() {
       <FinalCTA />
 
       <style>{`
+        /* -----------------------------------------------------------
+           BRAND THEME — colors from The Cloud Group logo
+           ----------------------------------------------------------- */
+        :root {
+          --accent: #E5B32B;         /* golden yellow (logo) */
+          --accent-2: #C99A1A;       /* deeper gold for gradients */
+          --accent-ink: #1c1608;     /* dark ink for text on gold */
+        }
+
+        @keyframes pageFadeUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes gradientShift {
+          0%, 100% { background-position: 0% 50%; }
+          50%      { background-position: 100% 50%; }
+        }
+
+        /* H1 per-line mask reveal */
+        .hero-h1-line {
+          display: block;
+          overflow: hidden;
+          padding-bottom: 0.08em;
+        }
+
+        .hero-h1-line__inner {
+          display: block;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+          .hero-h1-line__inner {
+            animation: heroLineRise var(--dur, 700ms) cubic-bezier(.22, 1, .36, 1) var(--wd, 0ms) both;
+          }
+        }
+
+        @keyframes heroLineRise {
+          from { transform: translateY(110%); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
+
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
