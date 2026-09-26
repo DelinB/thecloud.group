@@ -188,7 +188,7 @@ export const PAGES = [
     title: 'Contact | The Cloud Group',
     description:
       'Book a free consultation. 2 hours, no obligation, no sales pitch.',
-    image: 'og/favicon.svg',
+    image: 'og/image.png',
     type: 'website',
     h1: 'Contact The Cloud Group',
     intro:
